@@ -127,7 +127,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	effort := shared.ReasoningEffortMinimal
+	effort := shared.ReasoningEffortLow
 	client := myrlm.NewOpenAIClient(myrlm.ClientConfig{
 		Model:        myrlm.SharedModel(oolongModel),
 		ReasoningEff: &effort,

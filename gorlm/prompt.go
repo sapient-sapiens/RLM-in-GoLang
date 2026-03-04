@@ -62,12 +62,16 @@ func GetSystemPromptWithCustomToolsFrom(basePrompt string, customTools []Tool) s
 func BuildUserPrompt(query Query, iteration int) Prompt {
 	var content string
 	if iteration == 0 {
-		content = "You have not interacted with the REPL environment yet. " +
+		content = "You have not interacted with the REPL environment or seen your prompt / context yet. " +
+			"Your next action should be to look through and figure out how to answer the prompt, so don't just provide a final answer yet.\n\n" +
 			"Think step-by-step on what to do using the REPL environment (which contains the context) " +
-			"to answer the prompt: \"" + string(query) + "\". Your next action:"
+			"to answer the prompt: \"" + string(query) + "\".\n\n" +
+			"Continue using the REPL environment, which has the `context` variable, " +
+			"and querying sub-LLMs by writing to ```repl``` tags, and determine your answer. Your next action:"
 	} else {
 		content = "The history before is your previous interactions with the REPL environment. " +
-			"Continue using the REPL environment to answer the prompt: \"" + string(query) + "\". Your next action:"
+			"Continue using the REPL environment, which has the `context` variable, " +
+			"and querying sub-LLMs by writing to ```repl``` tags, to answer the prompt: \"" + string(query) + "\". Your next action:"
 	}
 	return Prompt{Role: "user", Content: content}
 }
@@ -75,6 +79,10 @@ func BuildUserPrompt(query Query, iteration int) Prompt {
 func BuildInitialMessages(systemPrompt string, ctx ContextMetadata) []Prompt {
 	return []Prompt{
 		{Role: "system", Content: systemPrompt},
-		{Role: "user", Content: fmt.Sprintf("Your context has been loaded into the `context` variable. Type: %s, Length: %d chars.", ctx.Type, ctx.Length)},
+		{Role: "user", Content: fmt.Sprintf(
+			"Your context is a %s with %d total characters, "+
+				"and has been loaded into the `context` variable in the REPL. "+
+				"Use ```repl``` code blocks to inspect and work with it.",
+			ctx.Type, ctx.Length)},
 	}
 }

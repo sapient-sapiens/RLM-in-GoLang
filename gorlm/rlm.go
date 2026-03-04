@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 )
@@ -99,6 +100,10 @@ func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (stri
 		copy(currentPrompt, messageHistory)
 		currentPrompt = append(currentPrompt, userPrompt)
 
+		log.Printf("[RLM] iter %d/%d — calling LLM (%d messages, ~%d chars)...",
+			i+1, r.maxIterations, len(currentPrompt), promptChars(currentPrompt))
+		iterStart := time.Now()
+
 		result, err := r.client.QueryMessages(ctx, currentPrompt)
 		if err != nil {
 			return "", fmt.Errorf("root LLM call (iteration %d): %w", i, err)
@@ -106,17 +111,33 @@ func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (stri
 		response := result.Text
 		codeBlocks := findCodeBlocks(response)
 
+		preview := response
+		if len(preview) > 300 {
+			preview = preview[:300] + "..."
+		}
+		log.Printf("[RLM] iter %d/%d — LLM responded in %s (%d chars, %d code blocks)\n  Response: %s",
+			i+1, r.maxIterations, time.Since(iterStart).Round(time.Millisecond), len(response), len(codeBlocks), preview)
+
 		var newMessages []Prompt
 		newMessages = append(newMessages, Prompt{Role: "assistant", Content: response})
 		iterationHadError := false
 
-		for _, code := range codeBlocks {
+		for j, code := range codeBlocks {
+			log.Printf("[RLM] iter %d — executing code block %d/%d (%d chars)...",
+				i+1, j+1, len(codeBlocks), len(code))
 			replResult, execErr := repl.ExecuteCode(code)
 			if execErr != nil || (replResult != nil && strings.TrimSpace(replResult.Stderr) != "") {
 				iterationHadError = true
+				if execErr != nil {
+					log.Printf("[RLM] iter %d — code block %d exec error: %v", i+1, j+1, execErr)
+				}
+				if replResult != nil && strings.TrimSpace(replResult.Stderr) != "" {
+					log.Printf("[RLM] iter %d — code block %d stderr: %.200s", i+1, j+1, replResult.Stderr)
+				}
 			}
 
 			if replResult != nil && replResult.FinalAnswer != "" {
+				log.Printf("[RLM] iter %d — FINAL answer from REPL: %.100s", i+1, replResult.FinalAnswer)
 				return replResult.FinalAnswer, nil
 			}
 
@@ -124,19 +145,20 @@ func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (stri
 			if len(formatted) > 20000 {
 				formatted = formatted[:20000] + fmt.Sprintf("... + [%d chars...]", len(formatted)-20000)
 			}
+			log.Printf("[RLM] iter %d — code block %d output: %.200s", i+1, j+1, formatted)
 			newMessages = append(newMessages, Prompt{
 				Role:    "user",
 				Content: fmt.Sprintf("Code executed:\n```python\n%s\n```\n\nREPL output:\n%s", code, formatted),
 			})
 		}
 
-		// Check FINAL(...) after REPL execution.
 		if finalAnswer, finalErr := findFinalAnswer(response); finalErr == nil {
+			log.Printf("[RLM] iter %d — FINAL() found in response: %.100s", i+1, finalAnswer)
 			return finalAnswer, nil
 		}
 
-		// Check FINAL_VAR(name) in raw text — resolve by executing in the REPL.
 		if varName, ok := findFinalVar(response); ok {
+			log.Printf("[RLM] iter %d — FINAL_VAR(%s) found, resolving...", i+1, varName)
 			if res, err := repl.ExecuteCode(fmt.Sprintf("FINAL_VAR(%q)", varName)); err == nil && res != nil && res.FinalAnswer != "" {
 				return res.FinalAnswer, nil
 			}
@@ -161,9 +183,25 @@ func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (stri
 		}
 	}
 
+	log.Printf("[RLM] exhausted %d iterations without FINAL — requesting fallback answer...", r.maxIterations)
+	fallbackPrompt := append(messageHistory, Prompt{
+		Role:    "user",
+		Content: "You have run out of iterations. Based on everything above, provide your final answer to the original query now. Output ONLY the answer, nothing else.",
+	})
+	if fallbackResult, err := r.client.QueryMessages(ctx, fallbackPrompt); err == nil && strings.TrimSpace(fallbackResult.Text) != "" {
+		return fallbackResult.Text, nil
+	}
+
 	if bestPartialAnswer != "" {
 		return bestPartialAnswer, nil
 	}
-	// Let it error out if no answer retrieved after max iterations
 	return "", errors.New("max iterations reached without final answer")
+}
+
+func promptChars(msgs []Prompt) int {
+	n := 0
+	for _, m := range msgs {
+		n += len(m.Content)
+	}
+	return n
 }

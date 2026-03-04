@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	codeBlockPattern = regexp.MustCompile("(?s)```repl\\s*\\n(.*?)\\n```")
+	codeBlockPattern = regexp.MustCompile("(?s)```(?:repl|python)\\s*\\n(.*?)\\n```")
 	finalPattern     = regexp.MustCompile(`(?ms)^\s*FINAL\((.*)\)\s*$`)
 	finalVarPattern  = regexp.MustCompile(`(?ms)^\s*FINAL_VAR\(["']?(\w+)["']?\)\s*$`)
 )

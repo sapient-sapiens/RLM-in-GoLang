@@ -264,13 +264,32 @@ def llm_query_batched(prompts, model=None):
         futures = [pool.submit(llm_query, p, model) for p in prompts]
         return [f.result() for f in futures]
 
+def _with_context(prompt):
+    # Docker mode fallback: sub-RLM recursion is not fully wired.
+    # Give llm_query enough context to still do useful subtask work.
+    ctx = _locals.get("context")
+    if ctx is None:
+        return str(prompt)
+    if isinstance(ctx, str):
+        context_str = ctx
+    else:
+        try:
+            context_str = json.dumps(ctx, ensure_ascii=False)
+        except:
+            context_str = str(ctx)
+    return (
+        "You are handling a subtask from a parent reasoning loop.\n"
+        "Use the following context as the source of truth.\n\n"
+        "Context:\n" + context_str + "\n\n"
+        "Subtask:\n" + str(prompt)
+    )
+
 def rlm_query(prompt, model=None):
-    resp = _post("/rlm_query", {"prompt": str(prompt), "model": model})
-    return resp.get("text") or resp.get("error", "Unknown error")
+    return llm_query(_with_context(prompt), model=model)
 
 def rlm_query_batched(prompts, model=None):
     with concurrent.futures.ThreadPoolExecutor(max_workers=min(len(prompts), 4)) as pool:
-        futures = [pool.submit(rlm_query, p, model) for p in prompts]
+        futures = [pool.submit(llm_query, _with_context(p), model) for p in prompts]
         return [f.result() for f in futures]
 
 STATE = "/workspace/state.dill"
