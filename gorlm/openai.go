@@ -16,6 +16,10 @@ import (
 
 var DefaultModel shared.ResponsesModel = openai.ChatModelGPT5
 
+const (
+	defaultCompactionThreshold int64 = 12000
+)
+
 func SharedModel(name string) shared.ResponsesModel {
 	return shared.ResponsesModel(name)
 }
@@ -27,6 +31,13 @@ type ClientConfig struct {
 	Temperature  *float64
 	MaxTokens    *int64
 	Instructions string
+	// CompactionThreshold controls when Responses API context compaction triggers.
+	// If nil, a conservative default is used.
+	// Set to <= 0 to disable explicit compaction configuration.
+	CompactionThreshold *int64
+	// DisableAutoTruncation disables Responses API truncation="auto" behavior.
+	// By default truncation stays enabled so oversized contexts don't hard-fail.
+	DisableAutoTruncation bool
 }
 
 type OpenAIClient struct {
@@ -78,7 +89,25 @@ func (c *OpenAIClient) baseParams(input responses.ResponseNewParamsInputUnion) r
 	if c.config.Instructions != "" {
 		p.Instructions = openai.String(c.config.Instructions)
 	}
+	if !c.config.DisableAutoTruncation {
+		p.Truncation = responses.ResponseNewParamsTruncationAuto
+	}
+	if threshold := c.compactionThreshold(); threshold > 0 {
+		p.ContextManagement = []responses.ResponseNewParamsContextManagement{
+			{
+				Type:             "compaction",
+				CompactThreshold: openai.Int(threshold),
+			},
+		}
+	}
 	return p
+}
+
+func (c *OpenAIClient) compactionThreshold() int64 {
+	if c.config.CompactionThreshold != nil {
+		return *c.config.CompactionThreshold
+	}
+	return defaultCompactionThreshold
 }
 
 func (c *OpenAIClient) extractUsage(resp *responses.Response, start time.Time, streamed bool, ttft time.Duration) RequestStats {

@@ -10,23 +10,25 @@ import (
 )
 
 const (
-	DefaultMaxIterations = 10
-	DefaultMaxDepth      = 1
-	DefaultDepth         = 0
+	DefaultMaxIterations  = 10
+	DefaultMaxDepth       = 1
+	DefaultDepth          = 0
+	defaultMaxPromptChars = 200000
 )
 
 type RLM struct {
-	depth         int
-	maxIterations int
-	maxDepth      int
-	maxBudget     *float64
-	maxTimeout    *float64
-	maxTokens     *int
-	maxErrors     *int
-	systemPrompt  string
-	customTools   []Tool
-	dockerConfig  DockerConfig
-	client        *OpenAIClient
+	depth          int
+	maxIterations  int
+	maxDepth       int
+	maxBudget      *float64
+	maxTimeout     *float64
+	maxTokens      *int
+	maxPromptChars *int
+	maxErrors      *int
+	systemPrompt   string
+	customTools    []Tool
+	dockerConfig   DockerConfig
+	client         *OpenAIClient
 }
 
 func NewRLM(client *OpenAIClient, opts ...RLMOption) *RLM {
@@ -51,6 +53,7 @@ func WithMaxDepth(d int) RLMOption           { return func(r *RLM) { r.maxDepth 
 func WithMaxBudget(b float64) RLMOption      { return func(r *RLM) { r.maxBudget = &b } }
 func WithMaxTimeout(t float64) RLMOption     { return func(r *RLM) { r.maxTimeout = &t } }
 func WithMaxTokens(t int) RLMOption          { return func(r *RLM) { r.maxTokens = &t } }
+func WithMaxPromptChars(n int) RLMOption     { return func(r *RLM) { r.maxPromptChars = &n } }
 func WithMaxErrors(e int) RLMOption          { return func(r *RLM) { r.maxErrors = &e } }
 func WithSystemPrompt(p string) RLMOption    { return func(r *RLM) { r.systemPrompt = p } }
 func WithCustomTools(tools []Tool) RLMOption { return func(r *RLM) { r.customTools = tools } }
@@ -99,6 +102,7 @@ func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (stri
 		currentPrompt := make([]Prompt, len(messageHistory))
 		copy(currentPrompt, messageHistory)
 		currentPrompt = append(currentPrompt, userPrompt)
+		currentPrompt = r.compactPrompt(currentPrompt)
 
 		log.Printf("[RLM] iter %d/%d — calling LLM (%d messages, ~%d chars)...",
 			i+1, r.maxIterations, len(currentPrompt), promptChars(currentPrompt))
@@ -188,6 +192,7 @@ func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (stri
 		Role:    "user",
 		Content: "You have run out of iterations. Based on everything above, provide your final answer to the original query now. Output ONLY the answer, nothing else.",
 	})
+	fallbackPrompt = r.compactPrompt(fallbackPrompt)
 	if fallbackResult, err := r.client.QueryMessages(ctx, fallbackPrompt); err == nil && strings.TrimSpace(fallbackResult.Text) != "" {
 		return fallbackResult.Text, nil
 	}
@@ -204,4 +209,46 @@ func promptChars(msgs []Prompt) int {
 		n += len(m.Content)
 	}
 	return n
+}
+
+func (r *RLM) compactPrompt(msgs []Prompt) []Prompt {
+	limit := defaultMaxPromptChars
+	if r.maxPromptChars != nil {
+		limit = *r.maxPromptChars
+	}
+	if limit <= 0 || promptChars(msgs) <= limit || len(msgs) <= 2 {
+		return msgs
+	}
+
+	// Keep foundational messages (system + initial context notice), then keep newest turns.
+	pinnedCount := 0
+	if len(msgs) > 0 && msgs[0].Role == "system" {
+		pinnedCount = 1
+	}
+	if len(msgs) > 1 && pinnedCount == 1 {
+		pinnedCount = 2
+	}
+
+	compacted := make([]Prompt, 0, len(msgs))
+	compacted = append(compacted, msgs[:pinnedCount]...)
+	used := promptChars(compacted)
+	if used >= limit {
+		return compacted
+	}
+
+	budget := limit - used
+	keptReversed := make([]Prompt, 0, len(msgs)-pinnedCount)
+	for i := len(msgs) - 1; i >= pinnedCount; i-- {
+		cost := len(msgs[i].Content)
+		if cost > budget {
+			continue
+		}
+		keptReversed = append(keptReversed, msgs[i])
+		budget -= cost
+	}
+
+	for i := len(keptReversed) - 1; i >= 0; i-- {
+		compacted = append(compacted, keptReversed[i])
+	}
+	return compacted
 }
