@@ -16,6 +16,10 @@ import (
 
 var DefaultModel shared.ResponsesModel = openai.ChatModelGPT5
 
+const (
+	defaultCompactionThreshold int64 = 12000
+)
+
 func SharedModel(name string) shared.ResponsesModel {
 	return shared.ResponsesModel(name)
 }
@@ -27,6 +31,13 @@ type ClientConfig struct {
 	Temperature  *float64
 	MaxTokens    *int64
 	Instructions string
+	// CompactionThreshold controls when Responses API context compaction triggers.
+	// If nil, a conservative default is used.
+	// Set to <= 0 to disable explicit compaction configuration.
+	CompactionThreshold *int64
+	// DisableAutoTruncation disables Responses API truncation="auto" behavior.
+	// By default truncation stays enabled so oversized contexts don't hard-fail.
+	DisableAutoTruncation bool
 }
 
 type OpenAIClient struct {
@@ -78,7 +89,25 @@ func (c *OpenAIClient) baseParams(input responses.ResponseNewParamsInputUnion) r
 	if c.config.Instructions != "" {
 		p.Instructions = openai.String(c.config.Instructions)
 	}
+	if !c.config.DisableAutoTruncation {
+		p.Truncation = responses.ResponseNewParamsTruncationAuto
+	}
+	if threshold := c.compactionThreshold(); threshold > 0 {
+		p.ContextManagement = []responses.ResponseNewParamsContextManagement{
+			{
+				Type:             "compaction",
+				CompactThreshold: openai.Int(threshold),
+			},
+		}
+	}
 	return p
+}
+
+func (c *OpenAIClient) compactionThreshold() int64 {
+	if c.config.CompactionThreshold != nil {
+		return *c.config.CompactionThreshold
+	}
+	return defaultCompactionThreshold
 }
 
 func (c *OpenAIClient) extractUsage(resp *responses.Response, start time.Time, streamed bool, ttft time.Duration) RequestStats {
@@ -249,9 +278,21 @@ func (c *OpenAIClient) NewChatWithInstructions(instructions string) *Chat {
 func (ch *Chat) Turns() int             { return ch.turns }
 func (ch *Chat) LastResponseID() string { return ch.lastResponseID }
 
-func (ch *Chat) buildParams(prompt string) responses.ResponseNewParams {
+func (ch *Chat) buildParamsForMessages(messages []Prompt) responses.ResponseNewParams {
+	var parts []responses.ResponseInputItemUnionParam
+	for _, m := range messages {
+		parts = append(parts, responses.ResponseInputItemUnionParam{
+			OfMessage: &responses.EasyInputMessageParam{
+				Role: responses.EasyInputMessageRole(m.Role),
+				Content: responses.EasyInputMessageContentUnionParam{
+					OfString: openai.String(m.Content),
+				},
+			},
+		})
+	}
+
 	p := ch.client.baseParams(responses.ResponseNewParamsInputUnion{
-		OfString: openai.String(prompt),
+		OfInputItemList: parts,
 	})
 	p.Store = openai.Bool(true)
 	if ch.instructions != "" {
@@ -263,6 +304,10 @@ func (ch *Chat) buildParams(prompt string) responses.ResponseNewParams {
 	return p
 }
 
+func (ch *Chat) buildParams(prompt string) responses.ResponseNewParams {
+	return ch.buildParamsForMessages([]Prompt{{Role: "user", Content: prompt}})
+}
+
 func (ch *Chat) Send(ctx context.Context, prompt string) (*QueryResult, error) {
 	params := ch.buildParams(prompt)
 
@@ -270,6 +315,22 @@ func (ch *Chat) Send(ctx context.Context, prompt string) (*QueryResult, error) {
 	resp, err := ch.client.raw.Responses.New(ctx, params)
 	if err != nil {
 		return nil, fmt.Errorf("chat send: %w", err)
+	}
+
+	ch.lastResponseID = resp.ID
+	ch.turns++
+
+	stats := ch.client.extractUsage(resp, start, false, 0)
+	return &QueryResult{Text: resp.OutputText(), Stats: stats}, nil
+}
+
+func (ch *Chat) SendMessages(ctx context.Context, messages []Prompt) (*QueryResult, error) {
+	params := ch.buildParamsForMessages(messages)
+
+	start := time.Now()
+	resp, err := ch.client.raw.Responses.New(ctx, params)
+	if err != nil {
+		return nil, fmt.Errorf("chat send messages: %w", err)
 	}
 
 	ch.lastResponseID = resp.ID

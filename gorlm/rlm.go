@@ -16,17 +16,18 @@ const (
 )
 
 type RLM struct {
-	depth         int
-	maxIterations int
-	maxDepth      int
-	maxBudget     *float64
-	maxTimeout    *float64
-	maxTokens     *int
-	maxErrors     *int
-	systemPrompt  string
-	customTools   []Tool
-	dockerConfig  DockerConfig
-	client        *OpenAIClient
+	depth          int
+	maxIterations  int
+	maxDepth       int
+	maxBudget      *float64
+	maxTimeout     *float64
+	maxTokens      *int
+	maxPromptChars *int
+	maxErrors      *int
+	systemPrompt   string
+	customTools    []Tool
+	dockerConfig   DockerConfig
+	client         *OpenAIClient
 }
 
 func NewRLM(client *OpenAIClient, opts ...RLMOption) *RLM {
@@ -51,6 +52,7 @@ func WithMaxDepth(d int) RLMOption           { return func(r *RLM) { r.maxDepth 
 func WithMaxBudget(b float64) RLMOption      { return func(r *RLM) { r.maxBudget = &b } }
 func WithMaxTimeout(t float64) RLMOption     { return func(r *RLM) { r.maxTimeout = &t } }
 func WithMaxTokens(t int) RLMOption          { return func(r *RLM) { r.maxTokens = &t } }
+func WithMaxPromptChars(n int) RLMOption     { return func(r *RLM) { r.maxPromptChars = &n } }
 func WithMaxErrors(e int) RLMOption          { return func(r *RLM) { r.maxErrors = &e } }
 func WithSystemPrompt(p string) RLMOption    { return func(r *RLM) { r.systemPrompt = p } }
 func WithCustomTools(tools []Tool) RLMOption { return func(r *RLM) { r.customTools = tools } }
@@ -88,7 +90,11 @@ func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (stri
 	}
 
 	systemPrompt := GetSystemPromptWithCustomToolsFrom(r.systemPrompt, r.customTools)
-	messageHistory := BuildInitialMessages(systemPrompt, rlmCtx.Metadata)
+	initialMessages := BuildInitialMessages(systemPrompt, rlmCtx.Metadata)
+	chat := r.client.NewChatWithInstructions(systemPrompt)
+
+	pendingUserMessages := make([]Prompt, 0, 1)
+	pendingUserMessages = append(pendingUserMessages, initialMessages[1])
 
 	var bestPartialAnswer string
 	consecutiveErrors := 0
@@ -96,18 +102,20 @@ func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (stri
 	for i := 0; i < r.maxIterations; i++ {
 		userPrompt := BuildUserPrompt(query, i)
 
-		currentPrompt := make([]Prompt, len(messageHistory))
-		copy(currentPrompt, messageHistory)
-		currentPrompt = append(currentPrompt, userPrompt)
+		currentInputs := append([]Prompt(nil), pendingUserMessages...)
+		currentInputs = append(currentInputs, userPrompt)
+		currentInputs = r.compactPrompt(currentInputs)
 
 		log.Printf("[RLM] iter %d/%d — calling LLM (%d messages, ~%d chars)...",
-			i+1, r.maxIterations, len(currentPrompt), promptChars(currentPrompt))
+			i+1, r.maxIterations, len(currentInputs), promptChars(currentInputs))
 		iterStart := time.Now()
 
-		result, err := r.client.QueryMessages(ctx, currentPrompt)
+		result, err := chat.SendMessages(ctx, currentInputs)
 		if err != nil {
 			return "", fmt.Errorf("root LLM call (iteration %d): %w", i, err)
 		}
+		pendingUserMessages = pendingUserMessages[:0]
+
 		response := result.Text
 		codeBlocks := findCodeBlocks(response)
 
@@ -118,8 +126,7 @@ func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (stri
 		log.Printf("[RLM] iter %d/%d — LLM responded in %s (%d chars, %d code blocks)\n  Response: %s",
 			i+1, r.maxIterations, time.Since(iterStart).Round(time.Millisecond), len(response), len(codeBlocks), preview)
 
-		var newMessages []Prompt
-		newMessages = append(newMessages, Prompt{Role: "assistant", Content: response})
+		var newUserMessages []Prompt
 		iterationHadError := false
 
 		for j, code := range codeBlocks {
@@ -146,7 +153,7 @@ func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (stri
 				formatted = formatted[:20000] + fmt.Sprintf("... + [%d chars...]", len(formatted)-20000)
 			}
 			log.Printf("[RLM] iter %d — code block %d output: %.200s", i+1, j+1, formatted)
-			newMessages = append(newMessages, Prompt{
+			newUserMessages = append(newUserMessages, Prompt{
 				Role:    "user",
 				Content: fmt.Sprintf("Code executed:\n```python\n%s\n```\n\nREPL output:\n%s", code, formatted),
 			})
@@ -176,7 +183,7 @@ func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (stri
 			consecutiveErrors = 0
 		}
 
-		messageHistory = append(messageHistory, newMessages...)
+		pendingUserMessages = append(pendingUserMessages, newUserMessages...)
 
 		if strings.TrimSpace(response) != "" {
 			bestPartialAnswer = response
@@ -184,11 +191,13 @@ func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (stri
 	}
 
 	log.Printf("[RLM] exhausted %d iterations without FINAL — requesting fallback answer...", r.maxIterations)
-	fallbackPrompt := append(messageHistory, Prompt{
+	fallbackInputs := append([]Prompt(nil), pendingUserMessages...)
+	fallbackInputs = append(fallbackInputs, Prompt{
 		Role:    "user",
 		Content: "You have run out of iterations. Based on everything above, provide your final answer to the original query now. Output ONLY the answer, nothing else.",
 	})
-	if fallbackResult, err := r.client.QueryMessages(ctx, fallbackPrompt); err == nil && strings.TrimSpace(fallbackResult.Text) != "" {
+	fallbackInputs = r.compactPrompt(fallbackInputs)
+	if fallbackResult, err := chat.SendMessages(ctx, fallbackInputs); err == nil && strings.TrimSpace(fallbackResult.Text) != "" {
 		return fallbackResult.Text, nil
 	}
 
@@ -204,4 +213,36 @@ func promptChars(msgs []Prompt) int {
 		n += len(m.Content)
 	}
 	return n
+}
+
+func (r *RLM) compactPrompt(msgs []Prompt) []Prompt {
+	// Default strategy: rely on Responses API truncation/context compaction.
+	// Only perform local manual compaction when an explicit hard cap is configured.
+	if r.maxPromptChars == nil || *r.maxPromptChars <= 0 {
+		return msgs
+	}
+	limit := *r.maxPromptChars
+	if promptChars(msgs) <= limit {
+		return msgs
+	}
+
+	pinnedCount := 2
+	compacted := make([]Prompt, 0, len(msgs))
+	compacted = append(compacted, msgs[:pinnedCount]...)
+	used := promptChars(compacted)
+	budget := limit - used
+	keptReversed := make([]Prompt, 0, len(msgs)-pinnedCount)
+	for i := len(msgs) - 1; i >= pinnedCount; i-- {
+		cost := len(msgs[i].Content)
+		if cost > budget {
+			continue
+		}
+		keptReversed = append(keptReversed, msgs[i])
+		budget -= cost
+	}
+
+	for i := len(keptReversed) - 1; i >= 0; i-- {
+		compacted = append(compacted, keptReversed[i])
+	}
+	return compacted
 }
