@@ -278,9 +278,21 @@ func (c *OpenAIClient) NewChatWithInstructions(instructions string) *Chat {
 func (ch *Chat) Turns() int             { return ch.turns }
 func (ch *Chat) LastResponseID() string { return ch.lastResponseID }
 
-func (ch *Chat) buildParams(prompt string) responses.ResponseNewParams {
+func (ch *Chat) buildParamsForMessages(messages []Prompt) responses.ResponseNewParams {
+	var parts []responses.ResponseInputItemUnionParam
+	for _, m := range messages {
+		parts = append(parts, responses.ResponseInputItemUnionParam{
+			OfMessage: &responses.EasyInputMessageParam{
+				Role: responses.EasyInputMessageRole(m.Role),
+				Content: responses.EasyInputMessageContentUnionParam{
+					OfString: openai.String(m.Content),
+				},
+			},
+		})
+	}
+
 	p := ch.client.baseParams(responses.ResponseNewParamsInputUnion{
-		OfString: openai.String(prompt),
+		OfInputItemList: parts,
 	})
 	p.Store = openai.Bool(true)
 	if ch.instructions != "" {
@@ -292,6 +304,10 @@ func (ch *Chat) buildParams(prompt string) responses.ResponseNewParams {
 	return p
 }
 
+func (ch *Chat) buildParams(prompt string) responses.ResponseNewParams {
+	return ch.buildParamsForMessages([]Prompt{{Role: "user", Content: prompt}})
+}
+
 func (ch *Chat) Send(ctx context.Context, prompt string) (*QueryResult, error) {
 	params := ch.buildParams(prompt)
 
@@ -299,6 +315,22 @@ func (ch *Chat) Send(ctx context.Context, prompt string) (*QueryResult, error) {
 	resp, err := ch.client.raw.Responses.New(ctx, params)
 	if err != nil {
 		return nil, fmt.Errorf("chat send: %w", err)
+	}
+
+	ch.lastResponseID = resp.ID
+	ch.turns++
+
+	stats := ch.client.extractUsage(resp, start, false, 0)
+	return &QueryResult{Text: resp.OutputText(), Stats: stats}, nil
+}
+
+func (ch *Chat) SendMessages(ctx context.Context, messages []Prompt) (*QueryResult, error) {
+	params := ch.buildParamsForMessages(messages)
+
+	start := time.Now()
+	resp, err := ch.client.raw.Responses.New(ctx, params)
+	if err != nil {
+		return nil, fmt.Errorf("chat send messages: %w", err)
 	}
 
 	ch.lastResponseID = resp.ID

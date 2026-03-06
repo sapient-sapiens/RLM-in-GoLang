@@ -10,10 +10,9 @@ import (
 )
 
 const (
-	DefaultMaxIterations  = 10
-	DefaultMaxDepth       = 1
-	DefaultDepth          = 0
-	defaultMaxPromptChars = 200000
+	DefaultMaxIterations = 10
+	DefaultMaxDepth      = 1
+	DefaultDepth         = 0
 )
 
 type RLM struct {
@@ -91,7 +90,11 @@ func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (stri
 	}
 
 	systemPrompt := GetSystemPromptWithCustomToolsFrom(r.systemPrompt, r.customTools)
-	messageHistory := BuildInitialMessages(systemPrompt, rlmCtx.Metadata)
+	initialMessages := BuildInitialMessages(systemPrompt, rlmCtx.Metadata)
+	chat := r.client.NewChatWithInstructions(systemPrompt)
+
+	pendingUserMessages := make([]Prompt, 0, 1)
+	pendingUserMessages = append(pendingUserMessages, initialMessages[1])
 
 	var bestPartialAnswer string
 	consecutiveErrors := 0
@@ -99,19 +102,20 @@ func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (stri
 	for i := 0; i < r.maxIterations; i++ {
 		userPrompt := BuildUserPrompt(query, i)
 
-		currentPrompt := make([]Prompt, len(messageHistory))
-		copy(currentPrompt, messageHistory)
-		currentPrompt = append(currentPrompt, userPrompt)
-		currentPrompt = r.compactPrompt(currentPrompt)
+		currentInputs := append([]Prompt(nil), pendingUserMessages...)
+		currentInputs = append(currentInputs, userPrompt)
+		currentInputs = r.compactPrompt(currentInputs)
 
 		log.Printf("[RLM] iter %d/%d — calling LLM (%d messages, ~%d chars)...",
-			i+1, r.maxIterations, len(currentPrompt), promptChars(currentPrompt))
+			i+1, r.maxIterations, len(currentInputs), promptChars(currentInputs))
 		iterStart := time.Now()
 
-		result, err := r.client.QueryMessages(ctx, currentPrompt)
+		result, err := chat.SendMessages(ctx, currentInputs)
 		if err != nil {
 			return "", fmt.Errorf("root LLM call (iteration %d): %w", i, err)
 		}
+		pendingUserMessages = pendingUserMessages[:0]
+
 		response := result.Text
 		codeBlocks := findCodeBlocks(response)
 
@@ -122,8 +126,7 @@ func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (stri
 		log.Printf("[RLM] iter %d/%d — LLM responded in %s (%d chars, %d code blocks)\n  Response: %s",
 			i+1, r.maxIterations, time.Since(iterStart).Round(time.Millisecond), len(response), len(codeBlocks), preview)
 
-		var newMessages []Prompt
-		newMessages = append(newMessages, Prompt{Role: "assistant", Content: response})
+		var newUserMessages []Prompt
 		iterationHadError := false
 
 		for j, code := range codeBlocks {
@@ -150,7 +153,7 @@ func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (stri
 				formatted = formatted[:20000] + fmt.Sprintf("... + [%d chars...]", len(formatted)-20000)
 			}
 			log.Printf("[RLM] iter %d — code block %d output: %.200s", i+1, j+1, formatted)
-			newMessages = append(newMessages, Prompt{
+			newUserMessages = append(newUserMessages, Prompt{
 				Role:    "user",
 				Content: fmt.Sprintf("Code executed:\n```python\n%s\n```\n\nREPL output:\n%s", code, formatted),
 			})
@@ -180,7 +183,7 @@ func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (stri
 			consecutiveErrors = 0
 		}
 
-		messageHistory = append(messageHistory, newMessages...)
+		pendingUserMessages = append(pendingUserMessages, newUserMessages...)
 
 		if strings.TrimSpace(response) != "" {
 			bestPartialAnswer = response
@@ -188,12 +191,13 @@ func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (stri
 	}
 
 	log.Printf("[RLM] exhausted %d iterations without FINAL — requesting fallback answer...", r.maxIterations)
-	fallbackPrompt := append(messageHistory, Prompt{
+	fallbackInputs := append([]Prompt(nil), pendingUserMessages...)
+	fallbackInputs = append(fallbackInputs, Prompt{
 		Role:    "user",
 		Content: "You have run out of iterations. Based on everything above, provide your final answer to the original query now. Output ONLY the answer, nothing else.",
 	})
-	fallbackPrompt = r.compactPrompt(fallbackPrompt)
-	if fallbackResult, err := r.client.QueryMessages(ctx, fallbackPrompt); err == nil && strings.TrimSpace(fallbackResult.Text) != "" {
+	fallbackInputs = r.compactPrompt(fallbackInputs)
+	if fallbackResult, err := chat.SendMessages(ctx, fallbackInputs); err == nil && strings.TrimSpace(fallbackResult.Text) != "" {
 		return fallbackResult.Text, nil
 	}
 
@@ -212,30 +216,20 @@ func promptChars(msgs []Prompt) int {
 }
 
 func (r *RLM) compactPrompt(msgs []Prompt) []Prompt {
-	limit := defaultMaxPromptChars
-	if r.maxPromptChars != nil {
-		limit = *r.maxPromptChars
+	// Default strategy: rely on Responses API truncation/context compaction.
+	// Only perform local manual compaction when an explicit hard cap is configured.
+	if r.maxPromptChars == nil || *r.maxPromptChars <= 0 {
+		return msgs
 	}
-	if limit <= 0 || promptChars(msgs) <= limit || len(msgs) <= 2 {
+	limit := *r.maxPromptChars
+	if promptChars(msgs) <= limit {
 		return msgs
 	}
 
-	// Keep foundational messages (system + initial context notice), then keep newest turns.
-	pinnedCount := 0
-	if len(msgs) > 0 && msgs[0].Role == "system" {
-		pinnedCount = 1
-	}
-	if len(msgs) > 1 && pinnedCount == 1 {
-		pinnedCount = 2
-	}
-
+	pinnedCount := 2
 	compacted := make([]Prompt, 0, len(msgs))
 	compacted = append(compacted, msgs[:pinnedCount]...)
 	used := promptChars(compacted)
-	if used >= limit {
-		return compacted
-	}
-
 	budget := limit - used
 	keptReversed := make([]Prompt, 0, len(msgs)-pinnedCount)
 	for i := len(msgs) - 1; i >= pinnedCount; i-- {
