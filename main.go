@@ -78,9 +78,22 @@ func loadOolongExample(path string) (*OolongExample, error) {
 }
 
 const (
-	oolongModel    = "gpt-5"
-	oolongDataPath = "rlm/examples/oolong_trec_coarse_example.json"
+	oolongModel             = "gpt-5"
+	defaultOolongDatasetKey = "65k"
 )
+
+type oolongDatasetSpec struct {
+	Path string
+}
+
+var oolongDatasets = map[string]oolongDatasetSpec{
+	"65k": {
+		Path: "rlm/examples/oolong_trec_coarse_example.json",
+	},
+	"16k": {
+		Path: "data/oolong/oolong_trec_coarse_16k.json",
+	},
+}
 
 // hardTasks are the 5 tasks most likely to trip up the RLM:
 //   - asymmetric constraints ("one user has X, the other has Y")
@@ -106,9 +119,26 @@ func parseTasks(spec string) ([]int, error) {
 	return out, nil
 }
 
+func resolveDataset(key string) (string, error) {
+	spec, ok := oolongDatasets[key]
+	if !ok {
+		return "", fmt.Errorf("invalid --dataset %q (supported: 16k, 65k)", key)
+	}
+
+	if _, err := os.Stat(spec.Path); err != nil {
+		if os.IsNotExist(err) {
+			return "", fmt.Errorf("dataset file %q not found", spec.Path)
+		}
+		return "", fmt.Errorf("stat dataset file %q: %w", spec.Path, err)
+	}
+
+	return spec.Path, nil
+}
+
 func main() {
 	tasksFlag := flag.String("tasks", "", "comma-separated task numbers to run (1-20), e.g. '11,14,16'")
 	itersFlag := flag.Int("iters", 10, "max RLM iterations per task")
+	datasetFlag := flag.String("dataset", defaultOolongDatasetKey, "dataset size preset to use: 16k or 65k")
 	flag.Parse()
 
 	taskNums := hardTasks
@@ -121,7 +151,13 @@ func main() {
 		}
 	}
 
-	example, err := loadOolongExample(oolongDataPath)
+	dataPath, err := resolveDataset(strings.TrimSpace(strings.ToLower(*datasetFlag)))
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+
+	example, err := loadOolongExample(dataPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to load data: %v\n", err)
 		os.Exit(1)
