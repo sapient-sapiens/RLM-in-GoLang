@@ -232,14 +232,11 @@ func (c *OpenAIClient) doStream(ctx context.Context, params responses.ResponseNe
 		return nil, fmt.Errorf("openai stream: %w", err)
 	}
 
-	if finalResp != nil {
-		fullText = finalResp.OutputText()
-	}
-
 	if finalResp == nil {
 		return &StreamResult{Text: fullText}, nil
 	}
 
+	fullText = finalResp.OutputText()
 	stats := c.extractUsage(finalResp, start, true, ttft)
 	return &StreamResult{Text: fullText, Stats: stats}, nil
 }
@@ -254,11 +251,12 @@ func PrintStreamCallback(w io.Writer) StreamCallback {
 // ─── Chat Sessions ──────────────────────────────────────────────────────────
 
 type Chat struct {
-	client         *OpenAIClient
-	lastResponseID string
-	instructions   string
-	model          shared.ResponsesModel
-	turns          int
+	client          *OpenAIClient
+	lastResponseID  string
+	instructions    string
+	model           shared.ResponsesModel
+	maxOutputTokens *int64
+	turns           int
 }
 
 func (c *OpenAIClient) NewChat() *Chat {
@@ -277,6 +275,8 @@ func (c *OpenAIClient) NewChatWithInstructions(instructions string) *Chat {
 
 func (ch *Chat) Turns() int             { return ch.turns }
 func (ch *Chat) LastResponseID() string { return ch.lastResponseID }
+
+func (ch *Chat) SetMaxOutputTokens(n int64) { ch.maxOutputTokens = &n }
 
 func (ch *Chat) buildParamsForMessages(messages []Prompt) responses.ResponseNewParams {
 	var parts []responses.ResponseInputItemUnionParam
@@ -300,6 +300,9 @@ func (ch *Chat) buildParamsForMessages(messages []Prompt) responses.ResponseNewP
 	}
 	if ch.lastResponseID != "" {
 		p.PreviousResponseID = openai.String(ch.lastResponseID)
+	}
+	if ch.maxOutputTokens != nil {
+		p.MaxOutputTokens = openai.Int(*ch.maxOutputTokens)
 	}
 	return p
 }

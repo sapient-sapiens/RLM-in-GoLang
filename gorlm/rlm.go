@@ -12,29 +12,24 @@ import (
 const (
 	DefaultMaxIterations = 10
 	DefaultMaxDepth      = 1
-	DefaultDepth         = 0
 )
 
 type RLM struct {
-	depth          int
-	maxIterations  int
-	maxDepth       int
-	maxBudget      *float64
-	maxTimeout     *float64
-	maxTokens    *int
-	maxErrors    *int
-	systemPrompt string
-	customTools    []Tool
-	dockerConfig   DockerConfig
-	client         *OpenAIClient
+	maxIterations int
+	maxDepth      int
+	maxTimeout    *float64
+	maxTokens     *int64
+	maxBudget     *int64
+	maxErrors     *int
+	customTools   []Tool
+	dockerConfig  DockerConfig
+	client        *OpenAIClient
 }
 
 func NewRLM(client *OpenAIClient, opts ...RLMOption) *RLM {
 	r := &RLM{
-		depth:         DefaultDepth,
 		maxIterations: DefaultMaxIterations,
 		maxDepth:      DefaultMaxDepth,
-		systemPrompt:  DEFAULT_SYSTEM_PROMPT.Content,
 		client:        client,
 	}
 	for _, opt := range opts {
@@ -45,14 +40,12 @@ func NewRLM(client *OpenAIClient, opts ...RLMOption) *RLM {
 
 type RLMOption func(*RLM)
 
-func WithDepth(d int) RLMOption              { return func(r *RLM) { r.depth = d } }
 func WithMaxIterations(n int) RLMOption      { return func(r *RLM) { r.maxIterations = n } }
 func WithMaxDepth(d int) RLMOption           { return func(r *RLM) { r.maxDepth = d } }
-func WithMaxBudget(b float64) RLMOption      { return func(r *RLM) { r.maxBudget = &b } }
 func WithMaxTimeout(t float64) RLMOption     { return func(r *RLM) { r.maxTimeout = &t } }
-func WithMaxTokens(t int) RLMOption          { return func(r *RLM) { r.maxTokens = &t } }
+func WithMaxTokens(n int64) RLMOption        { return func(r *RLM) { r.maxTokens = &n } }
+func WithMaxBudget(n int64) RLMOption        { return func(r *RLM) { r.maxBudget = &n } }
 func WithMaxErrors(e int) RLMOption          { return func(r *RLM) { r.maxErrors = &e } }
-func WithSystemPrompt(p string) RLMOption    { return func(r *RLM) { r.systemPrompt = p } }
 func WithCustomTools(tools []Tool) RLMOption { return func(r *RLM) { r.customTools = tools } }
 func WithDockerConfig(cfg DockerConfig) RLMOption {
 	return func(r *RLM) { r.dockerConfig = cfg }
@@ -62,6 +55,12 @@ func WithDockerConfig(cfg DockerConfig) RLMOption {
 // parse code blocks, execute them in a Docker REPL, feed output back, repeat until
 // a FINAL answer is found.
 func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (string, error) {
+	return r.completion(ctx, rlmCtx, query, true)
+}
+
+// completion is the internal implementation for both root and child RLM calls.
+// Child calls reuse the already-running REPL server and set startServer=false.
+func (r *RLM) completion(ctx context.Context, rlmCtx Context, query Query, startServer bool) (string, error) {
 	if r.client == nil {
 		return "", errors.New("nil OpenAI client")
 	}
@@ -71,13 +70,17 @@ func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (stri
 		ctx, cancel = context.WithTimeout(ctx, time.Duration(*r.maxTimeout*float64(time.Second)))
 		defer cancel()
 	}
-	srv := NewREPLServer(r.client, r)
-	if err := srv.Start(); err != nil {
-		return "", fmt.Errorf("start repl server: %w", err)
+	if startServer {
+		srv := NewREPLServer(r.client, r)
+		if err := srv.Start(); err != nil {
+			return "", fmt.Errorf("start repl server: %w", err)
+		}
+		defer srv.Shutdown(ctx)
 	}
-	defer srv.Shutdown(ctx)
 
-	repl, err := NewDockerREPL(r.dockerConfig)
+	replCfg := r.dockerConfig
+	replCfg.Depth = r.maxDepth
+	repl, err := NewDockerREPL(replCfg)
 	if err != nil {
 		return "", fmt.Errorf("create docker repl: %w", err)
 	}
@@ -87,14 +90,20 @@ func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (stri
 		return "", fmt.Errorf("load context: %w", err)
 	}
 
-	systemPrompt := GetSystemPromptWithCustomToolsFrom(r.systemPrompt, r.customTools)
+	systemPrompt := GetSystemPromptWithCustomTools(r.customTools)
 	initialMessages := BuildInitialMessages(systemPrompt, rlmCtx.Metadata)
 	chat := r.client.NewChatWithInstructions(systemPrompt)
+	if r.maxTokens != nil {
+		chat.SetMaxOutputTokens(*r.maxTokens)
+	}
 
 	pendingUserMessages := make([]Prompt, 0, 1)
 	pendingUserMessages = append(pendingUserMessages, initialMessages[1])
 
-	var bestPartialAnswer string
+	var (
+		bestPartialAnswer string
+		totalTokensUsed   int64
+	)
 	consecutiveErrors := 0
 
 	for i := 0; i < r.maxIterations; i++ {
@@ -111,6 +120,15 @@ func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (stri
 			return "", fmt.Errorf("root LLM call (iteration %d): %w", i, err)
 		}
 		pendingUserMessages = pendingUserMessages[:0]
+
+		totalTokensUsed += result.Stats.Tokens.TotalTokens
+		if r.maxBudget != nil && totalTokensUsed > *r.maxBudget {
+			log.Printf("[RLM] iter %d — token budget exhausted (%d/%d)", i+1, totalTokensUsed, *r.maxBudget)
+			if bestPartialAnswer != "" {
+				return bestPartialAnswer, nil
+			}
+			return result.Text, nil
+		}
 
 		response := result.Text
 		codeBlocks := findCodeBlocks(response)

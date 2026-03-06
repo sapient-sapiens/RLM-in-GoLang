@@ -31,16 +31,15 @@ type DockerREPL struct {
 	image       string
 	containerID string
 	tempDir     string
+	rlmDepth    int
 	closed      bool
 }
 
 // DockerConfig holds options for creating a DockerREPL.
 type DockerConfig struct {
 	Image string
-	// APIKey/Model/Depth are kept for compatibility with older call sites.
-	APIKey string
-	Model  string
-	Depth  int
+	Model string
+	Depth int
 }
 
 // NewDockerREPL creates and starts a Docker container with a mounted workspace.
@@ -66,8 +65,9 @@ func NewDockerREPL(cfg DockerConfig) (*DockerREPL, error) {
 	}
 
 	d := &DockerREPL{
-		image:   image,
-		tempDir: tempDir,
+		image:    image,
+		tempDir:  tempDir,
+		rlmDepth: cfg.Depth,
 	}
 
 	success := false
@@ -150,7 +150,7 @@ func (d *DockerREPL) LoadContext(payload any) error {
 // FINAL_VAR, SHOW_VARS, and any variables from previous executions
 // (persisted via dill).
 func (d *DockerREPL) ExecuteCode(code string) (*REPLResult, error) {
-	script := buildExecScript(code)
+	script := buildExecScript(code, d.rlmDepth)
 
 	cmd := exec.Command("docker", "exec", d.containerID, "python", "-c", script)
 	var stdout, stderr bytes.Buffer
@@ -176,7 +176,7 @@ func (d *DockerREPL) ExecuteCodeWithTimeout(code string, timeout time.Duration) 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	script := buildExecScript(code)
+	script := buildExecScript(code, d.rlmDepth)
 
 	cmd := exec.CommandContext(ctx, "docker", "exec", d.containerID, "python", "-c", script)
 	var stdout, stderr bytes.Buffer
@@ -222,7 +222,7 @@ func (d *DockerREPL) Close() error {
 //   - defines FINAL_VAR and SHOW_VARS
 //   - executes the user's code with stdout/stderr capture
 //   - saves state and outputs JSON on the last line
-func buildExecScript(code string) string {
+func buildExecScript(code string, rlmDepth int) string {
 	codeB64 := base64.StdEncoding.EncodeToString([]byte(code))
 
 	return fmt.Sprintf(`
@@ -239,6 +239,7 @@ except ImportError:
     import pickle as dill
 
 _SERVER_BASE = "http://host.docker.internal:" + os.environ["RLM_SERVER_PORT"]
+_RLM_DEPTH = %d
 
 def _post(path, body):
     data = json.dumps(body).encode()
@@ -264,32 +265,28 @@ def llm_query_batched(prompts, model=None):
         futures = [pool.submit(llm_query, p, model) for p in prompts]
         return [f.result() for f in futures]
 
-def _with_context(prompt):
-    # Docker mode fallback: sub-RLM recursion is not fully wired.
-    # Give llm_query enough context to still do useful subtask work.
+def _safe_context_payload():
     ctx = _locals.get("context")
     if ctx is None:
-        return str(prompt)
-    if isinstance(ctx, str):
-        context_str = ctx
-    else:
-        try:
-            context_str = json.dumps(ctx, ensure_ascii=False)
-        except:
-            context_str = str(ctx)
-    return (
-        "You are handling a subtask from a parent reasoning loop.\n"
-        "Use the following context as the source of truth.\n\n"
-        "Context:\n" + context_str + "\n\n"
-        "Subtask:\n" + str(prompt)
-    )
+        return None
+    try:
+        json.dumps(ctx)
+        return ctx
+    except:
+        return str(ctx)
 
 def rlm_query(prompt, model=None):
-    return llm_query(_with_context(prompt), model=model)
+    resp = _post("/rlm_query", {
+        "prompt": str(prompt),
+        "model": model,
+        "depth": _RLM_DEPTH,
+        "context": _safe_context_payload(),
+    })
+    return resp.get("text") or resp.get("error", "Unknown error")
 
 def rlm_query_batched(prompts, model=None):
     with concurrent.futures.ThreadPoolExecutor(max_workers=min(len(prompts), 4)) as pool:
-        futures = [pool.submit(llm_query, _with_context(p), model) for p in prompts]
+        futures = [pool.submit(rlm_query, p, model) for p in prompts]
         return [f.result() for f in futures]
 
 STATE = "/workspace/state.dill"
@@ -376,7 +373,7 @@ output = {
     "final_answer": _final_answer[0],
 }
 print(json.dumps(output, ensure_ascii=False))
-`, codeB64)
+`, rlmDepth, codeB64)
 }
 
 // execOutput is the JSON structure printed by the exec script.

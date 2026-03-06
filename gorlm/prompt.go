@@ -1,6 +1,9 @@
 package myrlm
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Prompt struct {
 	Role    string
@@ -49,14 +52,16 @@ func GetSystemPromptWithCustomTools(customTools []Tool) string {
 }
 
 func GetSystemPromptWithCustomToolsFrom(basePrompt string, customTools []Tool) string {
-	customToolsSection := ""
-	if len(customTools) > 0 {
-		customToolsSection = "You have the following custom tools available:\n"
-		for _, tool := range customTools {
-			customToolsSection += fmt.Sprintf("- %s: %s\n", tool.Name, tool.Description)
-		}
+	if len(customTools) == 0 {
+		return basePrompt
 	}
-	return basePrompt + "\n" + customToolsSection
+	var b strings.Builder
+	b.WriteString(basePrompt)
+	b.WriteString("\nYou have the following custom tools available:\n")
+	for _, tool := range customTools {
+		fmt.Fprintf(&b, "- %s: %s\n", tool.Name, tool.Description)
+	}
+	return b.String()
 }
 
 func BuildUserPrompt(query Query, iteration int) Prompt {
