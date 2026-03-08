@@ -5,7 +5,10 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
+	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -135,11 +138,81 @@ func resolveDataset(key string) (string, error) {
 	return spec.Path, nil
 }
 
+type teeWriter struct {
+	terminal *os.File
+	logFile  *os.File
+}
+
+func (t *teeWriter) Write(p []byte) (int, error) {
+	n, err := t.terminal.Write(p)
+	if t.logFile != nil {
+		t.logFile.Write(p)
+	}
+	return n, err
+}
+
+func setupRunLog(dir string) (*os.File, error) {
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return nil, fmt.Errorf("create log dir: %w", err)
+	}
+	name := fmt.Sprintf("run_%s.log", time.Now().Format("2006-01-02_15-04-05"))
+	f, err := os.Create(filepath.Join(dir, name))
+	if err != nil {
+		return nil, err
+	}
+
+	origStdout := os.Stdout
+	origStderr := os.Stderr
+
+	outR, outW, err := os.Pipe()
+	if err != nil {
+		f.Close()
+		return nil, err
+	}
+	errR, errW, err := os.Pipe()
+	if err != nil {
+		outR.Close()
+		outW.Close()
+		f.Close()
+		return nil, err
+	}
+
+	os.Stdout = outW
+	os.Stderr = errW
+	log.SetOutput(errW)
+
+	go io.Copy(&teeWriter{terminal: origStdout, logFile: f}, outR)
+	go io.Copy(&teeWriter{terminal: origStderr, logFile: f}, errR)
+
+	return f, nil
+}
+
 func main() {
 	tasksFlag := flag.String("tasks", "", "comma-separated task numbers to run (1-20), e.g. '11,14,16'")
 	itersFlag := flag.Int("iters", 10, "max RLM iterations per task")
 	datasetFlag := flag.String("dataset", defaultOolongDatasetKey, "dataset size preset to use: 16k or 65k")
+	logDirFlag := flag.String("log_dir", "logs", "directory to save run logs")
+	predsFlag := flag.String("preds_dir", "", "directory to save prediction files for evaluation (task_<n>.txt)")
 	flag.Parse()
+
+	logFile, err := setupRunLog(*logDirFlag)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: could not set up log file: %v\n", err)
+	} else {
+		defer func() {
+			os.Stdout.Close()
+			os.Stderr.Close()
+			time.Sleep(50 * time.Millisecond)
+			logFile.Close()
+		}()
+	}
+
+	if *predsFlag != "" {
+		if err := os.MkdirAll(*predsFlag, 0o755); err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to create preds_dir: %v\n", err)
+			os.Exit(1)
+		}
+	}
 
 	taskNums := hardTasks
 	if *tasksFlag != "" {
@@ -211,6 +284,13 @@ func main() {
 		fmt.Println("Answer:")
 		fmt.Println(answer)
 		fmt.Printf("\nTask time: %s\n\n", taskDuration.Round(time.Millisecond))
+
+		if *predsFlag != "" {
+			predPath := filepath.Join(*predsFlag, fmt.Sprintf("task_%d.txt", taskNum))
+			if wErr := os.WriteFile(predPath, []byte(answer), 0o644); wErr != nil {
+				fmt.Fprintf(os.Stderr, "Warning: could not save prediction for task %d: %v\n", taskNum, wErr)
+			}
+		}
 	}
 
 	fmt.Println(client.Usage.Summary())

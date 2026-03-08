@@ -1,0 +1,8 @@
+.env
+logs/
+/oolong
+/oolong-eval
+/oolong-recursive
+.rlm_workspace/
+preds/
+*.pdf

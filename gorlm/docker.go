@@ -241,11 +241,11 @@ except ImportError:
 _SERVER_BASE = "http://host.docker.internal:" + os.environ["RLM_SERVER_PORT"]
 _RLM_DEPTH = %d
 
-def _post(path, body):
+def _post(path, body, timeout=1800):
     data = json.dumps(body).encode()
     req = Request(_SERVER_BASE + path, data=data, headers={"Content-Type": "application/json"})
     try:
-        with urlopen(req, timeout=300) as resp:
+        with urlopen(req, timeout=timeout) as resp:
             return json.loads(resp.read().decode())
     except HTTPError as e:
         return {"error": f"HTTP {e.code}: {e.read().decode()}"}

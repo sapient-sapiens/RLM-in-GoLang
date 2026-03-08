@@ -1,0 +1,2330 @@
+[
+  {
+    "user_id": 73621,
+    "date": "Oct 05, 2024",
+    "label": "numeric value",
+    "instance": "How long does it take to hike the entire Appalachian Trail ?"
+  },
+  {
+    "user_id": 99746,
+    "date": "Jan 17, 2025",
+    "label": "human being",
+    "instance": "Who fired Maria Ybarra from her position in San Diego council ?"
+  },
+  {
+    "user_id": 15626,
+    "date": "Jun 02, 2022",
+    "label": "human being",
+    "instance": "What two US biochemists won the Nobel Prize in medicine in 1992 ?"
+  },
+  {
+    "user_id": 46989,
+    "date": "Jun 01, 2025",
+    "label": "human being",
+    "instance": "Who was in Death of a Salesman original movie , not 1985 ?"
+  },
+  {
+    "user_id": 40541,
+    "date": "May 26, 2022",
+    "label": "location",
+    "instance": "What is the location of McCarren Airport ?"
+  },
+  {
+    "user_id": 86046,
+    "date": "Jan 13, 2023",
+    "label": "entity",
+    "instance": "What are the chemicals used in glowsticks ?"
+  },
+  {
+    "user_id": 32068,
+    "date": "Aug 11, 2023",
+    "label": "location",
+    "instance": "What U.S. state boasts Leif Ericson Park ?"
+  },
+  {
+    "user_id": 72667,
+    "date": "Apr 26, 2025",
+    "label": "human being",
+    "instance": "Who leads the star ship Enterprise in Star Trek ?"
+  },
+  {
+    "user_id": 15136,
+    "date": "Aug 08, 2023",
+    "label": "location",
+    "instance": "What countries have the best math students ?"
+  },
+  {
+    "user_id": 25577,
+    "date": "Sep 06, 2024",
+    "label": "entity",
+    "instance": "What is state tree of Nebraska ?"
+  },
+  {
+    "user_id": 18795,
+    "date": "Mar 18, 2022",
+    "label": "location",
+    "instance": "What mountainous region of the world is the Lhasa Apso dog native to ?"
+  },
+  {
+    "user_id": 47983,
+    "date": "Jun 27, 2023",
+    "label": "location",
+    "instance": "Where are the busiest ports in the world ?"
+  },
+  {
+    "user_id": 47286,
+    "date": "Jul 26, 2023",
+    "label": "numeric value",
+    "instance": "How many states have a lottery ?"
+  },
+  {
+    "user_id": 69042,
+    "date": "Nov 08, 2024",
+    "label": "human being",
+    "instance": "Who was Garrett Morgan married to ?"
+  },
+  {
+    "user_id": 55024,
+    "date": "Oct 31, 2023",
+    "label": "entity",
+    "instance": "What meter was invented by C.C. Magee in 1935 ?"
+  },
+  {
+    "user_id": 69042,
+    "date": "May 11, 2023",
+    "label": "numeric value",
+    "instance": "How many logarithmic scales are there on a slide rule ?"
+  },
+  {
+    "user_id": 73621,
+    "date": "Jan 06, 2024",
+    "label": "entity",
+    "instance": "What kind of tree graces Lebanon 's flag ?"
+  },
+  {
+    "user_id": 36169,
+    "date": "Aug 12, 2024",
+    "label": "numeric value",
+    "instance": "How many liberty bells have there been ?"
+  },
+  {
+    "user_id": 58512,
+    "date": "Sep 23, 2023",
+    "label": "abbreviation",
+    "instance": "What do the letters ZIP stand for in the phrase `` ZIP code '' ?"
+  },
+  {
+    "user_id": 88007,
+    "date": "Sep 21, 2024",
+    "label": "description and abstract concept",
+    "instance": "What is the difference between New York-style and Chicago-style pizza ?"
+  },
+  {
+    "user_id": 12471,
+    "date": "Apr 09, 2024",
+    "label": "entity",
+    "instance": "What was the name of the 1899 policy forced on China by which all nations had equal trading rights ?"
+  },
+  {
+    "user_id": 20161,
+    "date": "May 02, 2022",
+    "label": "abbreviation",
+    "instance": "What does the E stand for in the equation E=mc2 ?"
+  },
+  {
+    "user_id": 68289,
+    "date": "Jul 30, 2023",
+    "label": "abbreviation",
+    "instance": "CPR is the abbreviation for what ?"
+  },
+  {
+    "user_id": 66606,
+    "date": "Mar 20, 2023",
+    "label": "entity",
+    "instance": "What 's the name of the tiger that advertises for Frosted Flakes cereal ?"
+  },
+  {
+    "user_id": 18795,
+    "date": "Mar 26, 2023",
+    "label": "numeric value",
+    "instance": "How many objects orbit the Earth ?"
+  },
+  {
+    "user_id": 33747,
+    "date": "Apr 19, 2025",
+    "label": "abbreviation",
+    "instance": "What does the abbreviation OAS stand for ?"
+  },
+  {
+    "user_id": 69042,
+    "date": "Nov 04, 2024",
+    "label": "description and abstract concept",
+    "instance": "What do I have to do to get good grades in school ?"
+  },
+  {
+    "user_id": 75139,
+    "date": "Feb 01, 2024",
+    "label": "entity",
+    "instance": "What is the Scotch `` for people who know the difference '' ?"
+  },
+  {
+    "user_id": 48323,
+    "date": "Aug 22, 2023",
+    "label": "abbreviation",
+    "instance": "What does BMW stand for ?"
+  },
+  {
+    "user_id": 69291,
+    "date": "Jun 16, 2022",
+    "label": "numeric value",
+    "instance": "How many people are taller than 7 feet ?"
+  },
+  {
+    "user_id": 85683,
+    "date": "Dec 27, 2022",
+    "label": "entity",
+    "instance": "What does a man suffering from diphallic terata have ?"
+  },
+  {
+    "user_id": 73621,
+    "date": "Dec 22, 2022",
+    "label": "numeric value",
+    "instance": "How many presidents have died on the 4th of July ?"
+  },
+  {
+    "user_id": 64959,
+    "date": "Oct 17, 2024",
+    "label": "abbreviation",
+    "instance": "What does HIV stand for ?"
+  },
+  {
+    "user_id": 94993,
+    "date": "Jan 20, 2024",
+    "label": "numeric value",
+    "instance": "What is the highest number of home runs on record for any one game ?"
+  },
+  {
+    "user_id": 25577,
+    "date": "Aug 09, 2022",
+    "label": "abbreviation",
+    "instance": "What is HDLC ?"
+  },
+  {
+    "user_id": 85683,
+    "date": "Oct 06, 2023",
+    "label": "abbreviation",
+    "instance": "What does the channel ESPN stand for ?"
+  },
+  {
+    "user_id": 97007,
+    "date": "Aug 20, 2022",
+    "label": "abbreviation",
+    "instance": "What do the letters CE stand for on so many products , particularly electrical , purchased now ?"
+  },
+  {
+    "user_id": 98731,
+    "date": "Mar 26, 2025",
+    "label": "description and abstract concept",
+    "instance": "How can I search for a word within my own webpage ?"
+  },
+  {
+    "user_id": 18795,
+    "date": "Jul 25, 2023",
+    "label": "description and abstract concept",
+    "instance": "What is a bourdon tube ?"
+  },
+  {
+    "user_id": 46843,
+    "date": "Aug 22, 2024",
+    "label": "location",
+    "instance": "What country is home to Heineken beer ?"
+  },
+  {
+    "user_id": 64959,
+    "date": "Sep 06, 2024",
+    "label": "human being",
+    "instance": "Who portrayed Field Marshal Erwin Rommel in The Desert Fox ?"
+  },
+  {
+    "user_id": 16053,
+    "date": "Jul 12, 2023",
+    "label": "abbreviation",
+    "instance": "CNN is an acronym for what ?"
+  },
+  {
+    "user_id": 80894,
+    "date": "Jun 16, 2024",
+    "label": "numeric value",
+    "instance": "What is the telephone number for the University of Kentucky ?"
+  },
+  {
+    "user_id": 88007,
+    "date": "Apr 26, 2024",
+    "label": "numeric value",
+    "instance": "How many people was Randy Craft convicted of killing ?"
+  },
+  {
+    "user_id": 58512,
+    "date": "Jul 30, 2024",
+    "label": "numeric value",
+    "instance": "How much snow equals an inch of rain ?"
+  },
+  {
+    "user_id": 88007,
+    "date": "Sep 01, 2024",
+    "label": "entity",
+    "instance": "What cereal goes `` snap , crackle , pop '' ?"
+  },
+  {
+    "user_id": 79706,
+    "date": "Mar 19, 2024",
+    "label": "location",
+    "instance": "What country boasts Cawdor Castle , Glamis Castle , and Blair Castle ?"
+  },
+  {
+    "user_id": 46625,
+    "date": "Jul 29, 2023",
+    "label": "entity",
+    "instance": "What are the two largest birds on earth ?"
+  },
+  {
+    "user_id": 85683,
+    "date": "May 11, 2025",
+    "label": "location",
+    "instance": "What country 's national passenger rail system is called Via ?"
+  },
+  {
+    "user_id": 20161,
+    "date": "Apr 30, 2025",
+    "label": "location",
+    "instance": "Where did the Inuits live ?"
+  },
+  {
+    "user_id": 75139,
+    "date": "Jan 10, 2025",
+    "label": "location",
+    "instance": "Where did Dylan Thomas die ?"
+  },
+  {
+    "user_id": 64959,
+    "date": "Nov 03, 2023",
+    "label": "entity",
+    "instance": "Name the vessel used by the Atari Force in the DC comics ."
+  },
+  {
+    "user_id": 86046,
+    "date": "Jun 15, 2023",
+    "label": "numeric value",
+    "instance": "How much did a knight 's armor weigh ?"
+  },
+  {
+    "user_id": 40062,
+    "date": "Mar 26, 2023",
+    "label": "entity",
+    "instance": "What is the chemical composition of a Barbie ?"
+  },
+  {
+    "user_id": 48323,
+    "date": "Mar 02, 2022",
+    "label": "human being",
+    "instance": "Who was the 15th century fire-and-brimstone monk who gained control of Florence but ended burnt at the stake ?"
+  },
+  {
+    "user_id": 94993,
+    "date": "Sep 30, 2024",
+    "label": "human being",
+    "instance": "What poet wrote : `` ... I have promises to keep , and miles to go before I sleep '' ?"
+  },
+  {
+    "user_id": 25577,
+    "date": "Apr 23, 2025",
+    "label": "location",
+    "instance": "Where was Lincoln assassinated ?"
+  },
+  {
+    "user_id": 97007,
+    "date": "Jul 30, 2022",
+    "label": "human being",
+    "instance": "What party was Winston Churchill a member of ?"
+  },
+  {
+    "user_id": 20161,
+    "date": "Feb 04, 2025",
+    "label": "abbreviation",
+    "instance": "What does CPR stand for ?"
+  },
+  {
+    "user_id": 20161,
+    "date": "Sep 14, 2024",
+    "label": "abbreviation",
+    "instance": "What does R.E.M. stand for , as in the rock group R.E.M. ?"
+  },
+  {
+    "user_id": 46625,
+    "date": "Oct 29, 2022",
+    "label": "description and abstract concept",
+    "instance": "What is the circumorbital hematoma ?"
+  },
+  {
+    "user_id": 15626,
+    "date": "Apr 13, 2025",
+    "label": "location",
+    "instance": "Where is the location of the Orange Bowl ?"
+  },
+  {
+    "user_id": 91317,
+    "date": "Nov 08, 2022",
+    "label": "human being",
+    "instance": "What is the name of the woman who was with John Belushi when he died ?"
+  },
+  {
+    "user_id": 37213,
+    "date": "Jun 10, 2022",
+    "label": "description and abstract concept",
+    "instance": "What 's an auberge in France ?"
+  },
+  {
+    "user_id": 40062,
+    "date": "May 04, 2025",
+    "label": "numeric value",
+    "instance": "What percentage of American men are alcoholic ?"
+  },
+  {
+    "user_id": 88177,
+    "date": "Sep 04, 2023",
+    "label": "entity",
+    "instance": "What war added jeep and quisling to the English language ?"
+  },
+  {
+    "user_id": 97044,
+    "date": "Apr 04, 2023",
+    "label": "entity",
+    "instance": "What nuclear-powered Russian submarine sank in the Norwegian Sea on April 7 , 1989 ?"
+  },
+  {
+    "user_id": 84766,
+    "date": "Feb 23, 2024",
+    "label": "entity",
+    "instance": "What kind of sports team is the Buffalo Sabres ?"
+  },
+  {
+    "user_id": 73621,
+    "date": "Mar 01, 2025",
+    "label": "abbreviation",
+    "instance": "What does snafu stand for ?"
+  },
+  {
+    "user_id": 98731,
+    "date": "Oct 18, 2023",
+    "label": "human being",
+    "instance": "What is Supergirl 's secret identity ?"
+  },
+  {
+    "user_id": 57218,
+    "date": "Jul 14, 2022",
+    "label": "abbreviation",
+    "instance": "When reading classified ads , what does EENTY : other stand for ?"
+  },
+  {
+    "user_id": 89807,
+    "date": "Dec 03, 2022",
+    "label": "abbreviation",
+    "instance": "What is the abbreviated form of the National Bureau of Investigation ?"
+  },
+  {
+    "user_id": 73621,
+    "date": "Dec 19, 2023",
+    "label": "numeric value",
+    "instance": "How long do cardinal eggs incubate ?"
+  },
+  {
+    "user_id": 53756,
+    "date": "Jul 04, 2024",
+    "label": "location",
+    "instance": "What is the largest city in Texas ?"
+  },
+  {
+    "user_id": 64959,
+    "date": "Jan 09, 2025",
+    "label": "human being",
+    "instance": "What is her husband 's name ?"
+  },
+  {
+    "user_id": 24636,
+    "date": "Jan 13, 2023",
+    "label": "abbreviation",
+    "instance": "What is the abbreviation of the International Olympic Committee ?"
+  },
+  {
+    "user_id": 75139,
+    "date": "May 27, 2025",
+    "label": "abbreviation",
+    "instance": "In a computer , what does SCSI mean ?"
+  },
+  {
+    "user_id": 32068,
+    "date": "Jan 11, 2023",
+    "label": "abbreviation",
+    "instance": "What does NN O `` mean when used as a prefix in Irish surnames ?"
+  },
+  {
+    "user_id": 20161,
+    "date": "Dec 21, 2023",
+    "label": "description and abstract concept",
+    "instance": "Why does a wheel , e.g. a car tire , appear to spin in the opposite direction as it slows down ?"
+  },
+  {
+    "user_id": 33747,
+    "date": "Jun 22, 2023",
+    "label": "numeric value",
+    "instance": "How many shillings more than 2 were there in a guinea ?"
+  },
+  {
+    "user_id": 73621,
+    "date": "Mar 23, 2025",
+    "label": "human being",
+    "instance": "Who did the Seven Mules block for ?"
+  },
+  {
+    "user_id": 20161,
+    "date": "Jan 02, 2025",
+    "label": "location",
+    "instance": "What is the largest and most expensive freeway construction project in the U.S. right now ?"
+  },
+  {
+    "user_id": 87757,
+    "date": "Sep 04, 2022",
+    "label": "human being",
+    "instance": "What longtime game show host dropped dead while jogging in Central Park in 1984 ?"
+  },
+  {
+    "user_id": 97007,
+    "date": "Sep 24, 2023",
+    "label": "description and abstract concept",
+    "instance": "How do you tell somebody you like them ?"
+  },
+  {
+    "user_id": 25577,
+    "date": "Aug 28, 2024",
+    "label": "location",
+    "instance": "Where is the Kentucky Horse Park ?"
+  },
+  {
+    "user_id": 36169,
+    "date": "Jan 13, 2025",
+    "label": "human being",
+    "instance": "What President-to-be was the first member of Congress to enlist following the attack on Pearl Harbor ?"
+  },
+  {
+    "user_id": 64959,
+    "date": "Jul 09, 2022",
+    "label": "entity",
+    "instance": "What Nantucket shipwreck killed more divers exploring it than the 52 people it sank with ?"
+  },
+  {
+    "user_id": 19523,
+    "date": "Sep 15, 2023",
+    "label": "entity",
+    "instance": "What is a movie that Kevin Costner made about Sioux Indians ?"
+  },
+  {
+    "user_id": 15626,
+    "date": "Jun 06, 2025",
+    "label": "description and abstract concept",
+    "instance": "What is the difference between a bottle and a jar ?"
+  },
+  {
+    "user_id": 73621,
+    "date": "Dec 24, 2022",
+    "label": "abbreviation",
+    "instance": "What is BPH ?"
+  },
+  {
+    "user_id": 99746,
+    "date": "Sep 30, 2024",
+    "label": "entity",
+    "instance": "What was the sister ship of the Olympic ?"
+  },
+  {
+    "user_id": 46843,
+    "date": "May 24, 2022",
+    "label": "entity",
+    "instance": "Name a flying mammal ."
+  },
+  {
+    "user_id": 24636,
+    "date": "Jan 02, 2023",
+    "label": "location",
+    "instance": "Where is Belize located ?"
+  },
+  {
+    "user_id": 67678,
+    "date": "Oct 15, 2022",
+    "label": "entity",
+    "instance": "For what disease is the drug Sinemet used as a treatment ?"
+  },
+  {
+    "user_id": 90119,
+    "date": "Nov 06, 2024",
+    "label": "description and abstract concept",
+    "instance": "What is the difference between college and graduate school ?"
+  },
+  {
+    "user_id": 19523,
+    "date": "May 27, 2024",
+    "label": "human being",
+    "instance": "Who does the voices of the Simpsons ?"
+  },
+  {
+    "user_id": 85683,
+    "date": "Dec 02, 2022",
+    "label": "entity",
+    "instance": "What sports magazine has the largest circulation ?"
+  },
+  {
+    "user_id": 73426,
+    "date": "Jan 11, 2024",
+    "label": "location",
+    "instance": "What country was A Terrible Beauty to Leon Uris ?"
+  },
+  {
+    "user_id": 15626,
+    "date": "Jan 19, 2024",
+    "label": "location",
+    "instance": "What was the only country in the Western Hemisphere to join the Russian-led boycott of the 1984 Summer Olympics ?"
+  },
+  {
+    "user_id": 69042,
+    "date": "Apr 03, 2024",
+    "label": "description and abstract concept",
+    "instance": "What is a turnkey contract ?"
+  },
+  {
+    "user_id": 64959,
+    "date": "Nov 22, 2024",
+    "label": "description and abstract concept",
+    "instance": "What is the daily requirement of folic acid for an expectant mother ?"
+  },
+  {
+    "user_id": 97007,
+    "date": "Apr 02, 2023",
+    "label": "description and abstract concept",
+    "instance": "What is witch hazel ?"
+  },
+  {
+    "user_id": 97044,
+    "date": "Oct 04, 2024",
+    "label": "entity",
+    "instance": "Which mayonnaise refers to itself as `` real '' mayonnaise ?"
+  },
+  {
+    "user_id": 94993,
+    "date": "Jul 27, 2022",
+    "label": "entity",
+    "instance": "What is the rarest coin ?"
+  },
+  {
+    "user_id": 97679,
+    "date": "Dec 12, 2022",
+    "label": "numeric value",
+    "instance": "How many blacks served in the Vietnam War"
+  },
+  {
+    "user_id": 88007,
+    "date": "Feb 29, 2024",
+    "label": "numeric value",
+    "instance": "How many members of a family could be drafted in the U.S. military during World War II ?"
+  },
+  {
+    "user_id": 52477,
+    "date": "Oct 02, 2024",
+    "label": "numeric value",
+    "instance": "What date did man first land on the moon ?"
+  },
+  {
+    "user_id": 15626,
+    "date": "May 21, 2025",
+    "label": "description and abstract concept",
+    "instance": "What is the definition of a cascade ?"
+  },
+  {
+    "user_id": 62639,
+    "date": "Mar 03, 2023",
+    "label": "human being",
+    "instance": "Who followed up his first two underwater thrillers with The Girl of the Sea of Cortez ?"
+  },
+  {
+    "user_id": 97044,
+    "date": "Apr 09, 2023",
+    "label": "location",
+    "instance": "What is the richest state in the U.S. ?"
+  },
+  {
+    "user_id": 19523,
+    "date": "May 05, 2025",
+    "label": "abbreviation",
+    "instance": "What 's the abbreviation for limited partnership ?"
+  },
+  {
+    "user_id": 31800,
+    "date": "Dec 12, 2024",
+    "label": "abbreviation",
+    "instance": "What is the abbreviated expression for the National Bureau of Investigation ?"
+  },
+  {
+    "user_id": 70468,
+    "date": "Apr 30, 2024",
+    "label": "numeric value",
+    "instance": "How long should a person wash their hands before they are clean ?"
+  },
+  {
+    "user_id": 95006,
+    "date": "Mar 25, 2025",
+    "label": "abbreviation",
+    "instance": "What does e.g. stand for ?"
+  },
+  {
+    "user_id": 15136,
+    "date": "May 06, 2022",
+    "label": "location",
+    "instance": "Where must a soccer goalie stand to be permitted to handle the ball ?"
+  },
+  {
+    "user_id": 20161,
+    "date": "Apr 11, 2022",
+    "label": "description and abstract concept",
+    "instance": "Why do people get calluses ?"
+  },
+  {
+    "user_id": 15136,
+    "date": "Aug 23, 2023",
+    "label": "description and abstract concept",
+    "instance": "What is the English meaning of caliente ?"
+  },
+  {
+    "user_id": 82716,
+    "date": "Jan 18, 2025",
+    "label": "description and abstract concept",
+    "instance": "What is the Kashmir issue ?"
+  },
+  {
+    "user_id": 40062,
+    "date": "Jul 01, 2022",
+    "label": "human being",
+    "instance": "Who is Count Cinzano ?"
+  },
+  {
+    "user_id": 58512,
+    "date": "Jun 27, 2024",
+    "label": "numeric value",
+    "instance": "What is the length of border between the Ukraine and Russia ?"
+  },
+  {
+    "user_id": 46625,
+    "date": "Nov 08, 2022",
+    "label": "numeric value",
+    "instance": "How many home runs did Lou Gehrig have during his career ?"
+  },
+  {
+    "user_id": 31800,
+    "date": "Jul 24, 2024",
+    "label": "abbreviation",
+    "instance": "What is HTML ?"
+  },
+  {
+    "user_id": 98731,
+    "date": "Jan 25, 2024",
+    "label": "human being",
+    "instance": "What President served for five years , six months and 2 days ?"
+  },
+  {
+    "user_id": 20161,
+    "date": "Jul 03, 2022",
+    "label": "entity",
+    "instance": "What does the method called `` cold fusion '' create ?"
+  },
+  {
+    "user_id": 58512,
+    "date": "Jun 28, 2023",
+    "label": "location",
+    "instance": "What country is proud to claim Volcano National Park ?"
+  },
+  {
+    "user_id": 88007,
+    "date": "Jan 06, 2023",
+    "label": "entity",
+    "instance": "Which medium is Hamblen the first singing cowboy in ?"
+  },
+  {
+    "user_id": 85683,
+    "date": "Nov 16, 2022",
+    "label": "numeric value",
+    "instance": "What year did Spielberg make `` Jaws '' ?"
+  },
+  {
+    "user_id": 40062,
+    "date": "Jun 16, 2024",
+    "label": "abbreviation",
+    "instance": "What is AFS ?"
+  },
+  {
+    "user_id": 33747,
+    "date": "Mar 19, 2022",
+    "label": "numeric value",
+    "instance": "How many days does a typical mayfly live ?"
+  },
+  {
+    "user_id": 11345,
+    "date": "Jul 14, 2023",
+    "label": "human being",
+    "instance": "Who is the richest person in the world , without owning a business ?"
+  },
+  {
+    "user_id": 95006,
+    "date": "Jun 21, 2024",
+    "label": "numeric value",
+    "instance": "How many Israeli athletes were killed at the Munich Olympics ?"
+  },
+  {
+    "user_id": 97044,
+    "date": "Oct 11, 2022",
+    "label": "entity",
+    "instance": "What 1976 Deep Throat clone provides the leading lady with a second larynx ?"
+  },
+  {
+    "user_id": 15626,
+    "date": "Jul 19, 2023",
+    "label": "human being",
+    "instance": "What President dispatched a cruiser to carry Charles Lindbergh home after his epic flight ?"
+  },
+  {
+    "user_id": 46625,
+    "date": "Oct 07, 2023",
+    "label": "description and abstract concept",
+    "instance": "What are the words to the Canadian National anthem ?"
+  },
+  {
+    "user_id": 24636,
+    "date": "Oct 03, 2023",
+    "label": "description and abstract concept",
+    "instance": "How do I legally make my own will and testament ?"
+  },
+  {
+    "user_id": 20161,
+    "date": "Sep 22, 2024",
+    "label": "numeric value",
+    "instance": "When was the first Barbie produced ?"
+  },
+  {
+    "user_id": 84198,
+    "date": "Sep 04, 2023",
+    "label": "entity",
+    "instance": "What is the best selling computer model ever ?"
+  },
+  {
+    "user_id": 36169,
+    "date": "Feb 16, 2023",
+    "label": "location",
+    "instance": "What U.S. state lived under six flags ?"
+  },
+  {
+    "user_id": 69042,
+    "date": "Apr 19, 2024",
+    "label": "location",
+    "instance": "What 's the most common street name in America ?"
+  },
+  {
+    "user_id": 65984,
+    "date": "Nov 14, 2023",
+    "label": "location",
+    "instance": "What famed river flows through Bagdad ?"
+  },
+  {
+    "user_id": 56954,
+    "date": "Dec 09, 2023",
+    "label": "abbreviation",
+    "instance": "What does the T.S. stand for in T.S. Eliot 's name ?"
+  },
+  {
+    "user_id": 69042,
+    "date": "Sep 10, 2022",
+    "label": "numeric value",
+    "instance": "How many Marx Brothers were there ?"
+  },
+  {
+    "user_id": 32068,
+    "date": "Aug 29, 2022",
+    "label": "description and abstract concept",
+    "instance": "Why do eyes sometimes look red in photographs ?"
+  },
+  {
+    "user_id": 55947,
+    "date": "Jul 06, 2023",
+    "label": "abbreviation",
+    "instance": "What does BUD stand for ?"
+  },
+  {
+    "user_id": 95006,
+    "date": "Jun 15, 2023",
+    "label": "abbreviation",
+    "instance": "What is the abbreviation of General Motors ?"
+  },
+  {
+    "user_id": 15626,
+    "date": "Jun 02, 2025",
+    "label": "abbreviation",
+    "instance": "What does RCA stand for ?"
+  },
+  {
+    "user_id": 46625,
+    "date": "Sep 20, 2023",
+    "label": "numeric value",
+    "instance": "How long does it take the moon to revolve around the Earth ?"
+  },
+  {
+    "user_id": 64959,
+    "date": "Jun 16, 2024",
+    "label": "human being",
+    "instance": "Who else was considered for the role of Luke Skywalker when George Lucas was casting for Star Wars ?"
+  },
+  {
+    "user_id": 46625,
+    "date": "Sep 18, 2023",
+    "label": "abbreviation",
+    "instance": "What is the acronym for the rating system for air conditioner efficiency ?"
+  },
+  {
+    "user_id": 97007,
+    "date": "Oct 09, 2022",
+    "label": "human being",
+    "instance": "Who used to make cars with rotary engines ?"
+  },
+  {
+    "user_id": 18795,
+    "date": "Sep 18, 2024",
+    "label": "human being",
+    "instance": "Who was the first American in space ?"
+  },
+  {
+    "user_id": 36169,
+    "date": "Jan 04, 2024",
+    "label": "human being",
+    "instance": "Who wrote the book , `` The Grinch Who Stole Christmas '' ?"
+  },
+  {
+    "user_id": 98731,
+    "date": "Jun 30, 2022",
+    "label": "human being",
+    "instance": "What is Drew Barrymore 's middle name ?"
+  },
+  {
+    "user_id": 32068,
+    "date": "Jan 31, 2025",
+    "label": "numeric value",
+    "instance": "When was General Manuel Noriega ousted as the leader of Panama and turned over to U.S. authorities ?"
+  },
+  {
+    "user_id": 20161,
+    "date": "Mar 20, 2025",
+    "label": "numeric value",
+    "instance": "How many equal angles are there in an isosceles triangle ?"
+  },
+  {
+    "user_id": 33250,
+    "date": "Sep 02, 2023",
+    "label": "location",
+    "instance": "What two countries contain Sierra Nevada mountains ?"
+  },
+  {
+    "user_id": 46843,
+    "date": "Nov 06, 2022",
+    "label": "human being",
+    "instance": "Who killed Kurt Cobain ?"
+  },
+  {
+    "user_id": 79706,
+    "date": "Nov 01, 2022",
+    "label": "abbreviation",
+    "instance": "What does the `` c '' stand for in the equation E=mc2 ?"
+  },
+  {
+    "user_id": 82716,
+    "date": "Oct 14, 2022",
+    "label": "entity",
+    "instance": "What TV show did John Sebastian sing the theme for ?"
+  },
+  {
+    "user_id": 87757,
+    "date": "Jan 13, 2023",
+    "label": "entity",
+    "instance": "Name the operating system that runs on IBM-compatible machines ."
+  },
+  {
+    "user_id": 24636,
+    "date": "Mar 05, 2024",
+    "label": "numeric value",
+    "instance": "What is the most number of goals scored by a single team in an NHL hockey game ?"
+  },
+  {
+    "user_id": 46625,
+    "date": "May 26, 2025",
+    "label": "abbreviation",
+    "instance": "What does SIDS stand for ?"
+  },
+  {
+    "user_id": 65984,
+    "date": "Oct 24, 2024",
+    "label": "location",
+    "instance": "What country buys 25 percent of the world 's tea exports ?"
+  },
+  {
+    "user_id": 46843,
+    "date": "Mar 24, 2022",
+    "label": "human being",
+    "instance": "What was Mao , the Chinese leader 's , full name ?"
+  },
+  {
+    "user_id": 96460,
+    "date": "May 07, 2025",
+    "label": "description and abstract concept",
+    "instance": "What does `` intractable plantar keratoma '' mean ?"
+  },
+  {
+    "user_id": 65984,
+    "date": "Nov 21, 2023",
+    "label": "description and abstract concept",
+    "instance": "What did Mighty Mouse always sing as he went into action ?"
+  },
+  {
+    "user_id": 58512,
+    "date": "Jan 18, 2024",
+    "label": "entity",
+    "instance": "Which thrilled taste buds first - Snickers or 3 Musketeers ?"
+  },
+  {
+    "user_id": 68721,
+    "date": "Jun 16, 2022",
+    "label": "entity",
+    "instance": "What rabbit got its name because its ears resembled those of a jackass ?"
+  },
+  {
+    "user_id": 75139,
+    "date": "Oct 13, 2023",
+    "label": "abbreviation",
+    "instance": "What does A&W of root beer fame stand for ?"
+  },
+  {
+    "user_id": 36169,
+    "date": "May 27, 2022",
+    "label": "numeric value",
+    "instance": "What century did art 's Romantic Period begin in ?"
+  },
+  {
+    "user_id": 73006,
+    "date": "Jun 19, 2025",
+    "label": "human being",
+    "instance": "What famous model was married to Billy Joel ?"
+  },
+  {
+    "user_id": 25577,
+    "date": "Oct 01, 2024",
+    "label": "numeric value",
+    "instance": "In what year was the Berlin Wall erected ?"
+  },
+  {
+    "user_id": 88007,
+    "date": "Jun 12, 2025",
+    "label": "location",
+    "instance": "What is the best place to live in the world , considering climate , civilization ?"
+  },
+  {
+    "user_id": 73621,
+    "date": "Dec 25, 2024",
+    "label": "description and abstract concept",
+    "instance": "What does `` saute '' mean ?"
+  },
+  {
+    "user_id": 24636,
+    "date": "Apr 01, 2025",
+    "label": "numeric value",
+    "instance": "How many people was Randy Craft convicted of murdering ?"
+  },
+  {
+    "user_id": 31800,
+    "date": "Dec 18, 2024",
+    "label": "entity",
+    "instance": "What four-legged creature did a Cornell University study say would make man 's best companion in space ?"
+  },
+  {
+    "user_id": 40062,
+    "date": "Apr 10, 2025",
+    "label": "numeric value",
+    "instance": "How much does one ton of cement cost ?"
+  },
+  {
+    "user_id": 75139,
+    "date": "Nov 30, 2023",
+    "label": "human being",
+    "instance": "What American actress was the first to be called a `` vamp '' ?"
+  },
+  {
+    "user_id": 48987,
+    "date": "Jun 18, 2022",
+    "label": "abbreviation",
+    "instance": "What does U.S.S.R. stand for ?"
+  },
+  {
+    "user_id": 52477,
+    "date": "Dec 09, 2022",
+    "label": "abbreviation",
+    "instance": "What is RCD ?"
+  },
+  {
+    "user_id": 22890,
+    "date": "Apr 14, 2022",
+    "label": "entity",
+    "instance": "What is the Islamic equivalent of the Red Cross ?"
+  },
+  {
+    "user_id": 65984,
+    "date": "Nov 08, 2023",
+    "label": "human being",
+    "instance": "What famous coach said `` if you can 't beat 'em in the alley , you can 't beat 'em on the ice '' ?"
+  },
+  {
+    "user_id": 85683,
+    "date": "Oct 13, 2022",
+    "label": "location",
+    "instance": "Where is South Bend ?"
+  },
+  {
+    "user_id": 19485,
+    "date": "Apr 20, 2022",
+    "label": "entity",
+    "instance": "Which killer whale died at Sea World of a fungal infection ?"
+  },
+  {
+    "user_id": 94870,
+    "date": "Jun 14, 2023",
+    "label": "abbreviation",
+    "instance": "What does IOC stand for ?"
+  },
+  {
+    "user_id": 89807,
+    "date": "Dec 09, 2023",
+    "label": "description and abstract concept",
+    "instance": "What is a disaccharide ?"
+  },
+  {
+    "user_id": 20655,
+    "date": "Mar 20, 2024",
+    "label": "location",
+    "instance": "Where can one find Mozambique ?"
+  },
+  {
+    "user_id": 32068,
+    "date": "Mar 09, 2022",
+    "label": "location",
+    "instance": "What French seaport claims to be The Home of Wines ?"
+  },
+  {
+    "user_id": 32068,
+    "date": "Feb 25, 2025",
+    "label": "description and abstract concept",
+    "instance": "What is Eagle 's syndrome styloid process ?"
+  },
+  {
+    "user_id": 85683,
+    "date": "Apr 19, 2022",
+    "label": "human being",
+    "instance": "What British female pop singing star of the 1960s and early 1970s was a child actress in the 1940s and '50s ?"
+  },
+  {
+    "user_id": 86046,
+    "date": "May 19, 2025",
+    "label": "human being",
+    "instance": "Who was Ben Casey 's boss ?"
+  },
+  {
+    "user_id": 68144,
+    "date": "Jul 01, 2023",
+    "label": "description and abstract concept",
+    "instance": "What is time ?"
+  },
+  {
+    "user_id": 87140,
+    "date": "Jun 26, 2022",
+    "label": "location",
+    "instance": "What is the capital of Congo ?"
+  },
+  {
+    "user_id": 87757,
+    "date": "Dec 02, 2024",
+    "label": "description and abstract concept",
+    "instance": "What does the name Melissa mean ?"
+  },
+  {
+    "user_id": 98731,
+    "date": "May 26, 2024",
+    "label": "description and abstract concept",
+    "instance": "How can I look up someone 's E-mail address on the Internet ?"
+  },
+  {
+    "user_id": 91073,
+    "date": "Mar 08, 2024",
+    "label": "abbreviation",
+    "instance": "What is the full form of .com ?"
+  },
+  {
+    "user_id": 15626,
+    "date": "Feb 11, 2024",
+    "label": "numeric value",
+    "instance": "What year did Charles Dicken die ?"
+  },
+  {
+    "user_id": 82716,
+    "date": "May 19, 2023",
+    "label": "entity",
+    "instance": "What is the former name of Zimbabwe ?"
+  },
+  {
+    "user_id": 46625,
+    "date": "Mar 23, 2024",
+    "label": "numeric value",
+    "instance": "How many years make up a lustrum ?"
+  },
+  {
+    "user_id": 25577,
+    "date": "Jun 09, 2023",
+    "label": "abbreviation",
+    "instance": "What is SAP ?"
+  },
+  {
+    "user_id": 79706,
+    "date": "Nov 17, 2024",
+    "label": "entity",
+    "instance": "What 1915 film was the first to gross $5 million ?"
+  },
+  {
+    "user_id": 56001,
+    "date": "Sep 02, 2022",
+    "label": "human being",
+    "instance": "Who is the leader of Brunei ?"
+  },
+  {
+    "user_id": 65984,
+    "date": "Sep 05, 2022",
+    "label": "description and abstract concept",
+    "instance": "What is the Home Rule Act ?"
+  },
+  {
+    "user_id": 18795,
+    "date": "Aug 01, 2022",
+    "label": "human being",
+    "instance": "What army was founded by William Booth and his wife Catherine ?"
+  },
+  {
+    "user_id": 69042,
+    "date": "Nov 16, 2022",
+    "label": "location",
+    "instance": "What is the largest natural lake in Pennsylvania ?"
+  },
+  {
+    "user_id": 88007,
+    "date": "Sep 28, 2022",
+    "label": "numeric value",
+    "instance": "How many countries watch MTV Europe ?"
+  },
+  {
+    "user_id": 15626,
+    "date": "Feb 04, 2024",
+    "label": "description and abstract concept",
+    "instance": "What is a leper ?"
+  },
+  {
+    "user_id": 88007,
+    "date": "Apr 19, 2023",
+    "label": "abbreviation",
+    "instance": "What does NAFTA stand for ?"
+  },
+  {
+    "user_id": 86046,
+    "date": "Jun 04, 2024",
+    "label": "entity",
+    "instance": "What movie did Madilyn Kahn star in with Gene Wilder ?"
+  },
+  {
+    "user_id": 69042,
+    "date": "Dec 15, 2022",
+    "label": "entity",
+    "instance": "What is the name of the Jewish alphabet ?"
+  },
+  {
+    "user_id": 15626,
+    "date": "Nov 26, 2023",
+    "label": "description and abstract concept",
+    "instance": "What kind of greeting is appropriate to send on Yom Kippur ?"
+  },
+  {
+    "user_id": 68721,
+    "date": "Dec 20, 2024",
+    "label": "description and abstract concept",
+    "instance": "How do you write MLA style bibliographies for an Internet source ?"
+  },
+  {
+    "user_id": 33747,
+    "date": "Apr 21, 2025",
+    "label": "abbreviation",
+    "instance": "What does JESSICA mean ?"
+  },
+  {
+    "user_id": 64959,
+    "date": "Mar 12, 2022",
+    "label": "abbreviation",
+    "instance": "What is the abbreviation for Original Equipment Manufacturer ?"
+  },
+  {
+    "user_id": 66606,
+    "date": "Mar 12, 2023",
+    "label": "abbreviation",
+    "instance": "What does MSG stand for ?"
+  },
+  {
+    "user_id": 82716,
+    "date": "Oct 11, 2023",
+    "label": "entity",
+    "instance": "Winnie the Pooh is what kind of animal ?"
+  },
+  {
+    "user_id": 20161,
+    "date": "Jul 22, 2024",
+    "label": "abbreviation",
+    "instance": "What is LMDS ?"
+  },
+  {
+    "user_id": 24636,
+    "date": "Mar 18, 2025",
+    "label": "abbreviation",
+    "instance": "What is the acronym for the National Bureau of Investigation ?"
+  },
+  {
+    "user_id": 97044,
+    "date": "Apr 18, 2024",
+    "label": "entity",
+    "instance": "What does a collier mine ?"
+  },
+  {
+    "user_id": 65984,
+    "date": "Feb 26, 2022",
+    "label": "numeric value",
+    "instance": "What are bottle caps with presidents ' pictures inside worth ?"
+  },
+  {
+    "user_id": 54945,
+    "date": "Mar 04, 2023",
+    "label": "description and abstract concept",
+    "instance": "How do you measure the heat of the sun ?"
+  },
+  {
+    "user_id": 88007,
+    "date": "Jul 23, 2023",
+    "label": "abbreviation",
+    "instance": "What does CNN stand for ?"
+  },
+  {
+    "user_id": 97007,
+    "date": "Jan 10, 2025",
+    "label": "description and abstract concept",
+    "instance": "How did the jack-o '-lantern get it 's name ?"
+  },
+  {
+    "user_id": 25056,
+    "date": "Oct 19, 2024",
+    "label": "human being",
+    "instance": "Who was with Patricia Hearst the night she was kidnaped ?"
+  },
+  {
+    "user_id": 65984,
+    "date": "Mar 03, 2024",
+    "label": "entity",
+    "instance": "What was Paul Bunyan 's ox 's name ?"
+  },
+  {
+    "user_id": 89807,
+    "date": "Feb 26, 2022",
+    "label": "abbreviation",
+    "instance": "What is IOC an abbreviation of ?"
+  },
+  {
+    "user_id": 99746,
+    "date": "Jun 10, 2024",
+    "label": "entity",
+    "instance": "To what does Microsoft 's Windows 3 owe its success ?"
+  },
+  {
+    "user_id": 36169,
+    "date": "Jun 13, 2025",
+    "label": "description and abstract concept",
+    "instance": "What is Greek pita ?"
+  },
+  {
+    "user_id": 48323,
+    "date": "Nov 06, 2024",
+    "label": "abbreviation",
+    "instance": "What is the abbreviated term used for the National Bureau of Investigation ?"
+  },
+  {
+    "user_id": 66606,
+    "date": "Jun 07, 2025",
+    "label": "location",
+    "instance": "Where are the busiest Amtrak rail stations in the U.S. ?"
+  },
+  {
+    "user_id": 79706,
+    "date": "Dec 31, 2024",
+    "label": "description and abstract concept",
+    "instance": "How was the element calcium named ?"
+  },
+  {
+    "user_id": 65984,
+    "date": "Jul 25, 2024",
+    "label": "numeric value",
+    "instance": "How deep is a fathom ?"
+  },
+  {
+    "user_id": 68721,
+    "date": "Mar 23, 2025",
+    "label": "location",
+    "instance": "Where is Basque country located ?"
+  },
+  {
+    "user_id": 86046,
+    "date": "May 21, 2023",
+    "label": "human being",
+    "instance": "What is the name of the pop singer whose song became the theme song for a brand of catsup ?"
+  },
+  {
+    "user_id": 68721,
+    "date": "Mar 09, 2025",
+    "label": "numeric value",
+    "instance": "How many times does the tide ebb and flow each day ?"
+  },
+  {
+    "user_id": 46843,
+    "date": "May 28, 2024",
+    "label": "numeric value",
+    "instance": "What will the California gas tax be in the year 2000 ?"
+  },
+  {
+    "user_id": 64959,
+    "date": "May 05, 2023",
+    "label": "abbreviation",
+    "instance": "What does BTU mean ?"
+  },
+  {
+    "user_id": 96586,
+    "date": "Apr 17, 2023",
+    "label": "human being",
+    "instance": "Who was The Pride of the Yankees ?"
+  },
+  {
+    "user_id": 75139,
+    "date": "Aug 04, 2024",
+    "label": "human being",
+    "instance": "Who wrote ` The Pines of Rome ' ?"
+  },
+  {
+    "user_id": 33747,
+    "date": "Feb 02, 2024",
+    "label": "entity",
+    "instance": "What is the only vegetable that starts with `` z '' ?"
+  },
+  {
+    "user_id": 33670,
+    "date": "Feb 24, 2025",
+    "label": "numeric value",
+    "instance": "How big is a quart ?"
+  },
+  {
+    "user_id": 66606,
+    "date": "Oct 23, 2024",
+    "label": "numeric value",
+    "instance": "What is the chance of conceiving quadruplets ?"
+  },
+  {
+    "user_id": 85683,
+    "date": "Mar 16, 2022",
+    "label": "numeric value",
+    "instance": "How many miles are there between Tel Aviv , Israel and Memphis , Tennessee ?"
+  },
+  {
+    "user_id": 56295,
+    "date": "May 09, 2022",
+    "label": "description and abstract concept",
+    "instance": "What is pandoro ?"
+  },
+  {
+    "user_id": 15136,
+    "date": "Oct 14, 2022",
+    "label": "numeric value",
+    "instance": "What is the average cost for four years of medical school ?"
+  },
+  {
+    "user_id": 64959,
+    "date": "Jan 17, 2024",
+    "label": "description and abstract concept",
+    "instance": "In Waugh 's `` A Handful of Dust , '' what does the mad old man force the hero to do every afternoon ?"
+  },
+  {
+    "user_id": 52477,
+    "date": "May 19, 2024",
+    "label": "location",
+    "instance": "What California bridge was Don Brown the first to cross , on May 27 , 1937 ?"
+  },
+  {
+    "user_id": 58512,
+    "date": "Jul 25, 2023",
+    "label": "human being",
+    "instance": "What English queen had seventeen children ?"
+  },
+  {
+    "user_id": 89807,
+    "date": "Jun 27, 2024",
+    "label": "abbreviation",
+    "instance": "What is the full name of the PLO ?"
+  },
+  {
+    "user_id": 32068,
+    "date": "Apr 09, 2025",
+    "label": "abbreviation",
+    "instance": "What 's the abbreviation for trinitrotoluene ?"
+  },
+  {
+    "user_id": 68721,
+    "date": "Apr 21, 2023",
+    "label": "entity",
+    "instance": "What brand of white rum is still made in Cuba ?"
+  },
+  {
+    "user_id": 99746,
+    "date": "Apr 30, 2022",
+    "label": "entity",
+    "instance": "Musician Ray Charles plays what instrument ?"
+  },
+  {
+    "user_id": 89807,
+    "date": "Oct 12, 2022",
+    "label": "description and abstract concept",
+    "instance": "What is the definition of ` graphic details ' ?"
+  },
+  {
+    "user_id": 56556,
+    "date": "Jun 24, 2023",
+    "label": "location",
+    "instance": "What country 's northernmost city is Darwin ?"
+  },
+  {
+    "user_id": 73621,
+    "date": "Mar 07, 2023",
+    "label": "human being",
+    "instance": "Whose husbands have included Conrad Hilton Jr. , and Michael Wilding ?"
+  },
+  {
+    "user_id": 32068,
+    "date": "Aug 17, 2022",
+    "label": "location",
+    "instance": "What is the largest office block in the world ?"
+  },
+  {
+    "user_id": 97044,
+    "date": "Mar 08, 2024",
+    "label": "numeric value",
+    "instance": "How many athletes did Puerto Rico enter in the 1984 Winter Olympics ?"
+  },
+  {
+    "user_id": 31800,
+    "date": "Feb 25, 2025",
+    "label": "abbreviation",
+    "instance": "What does G.M.T. stand for ?"
+  },
+  {
+    "user_id": 97044,
+    "date": "Apr 17, 2022",
+    "label": "location",
+    "instance": "What city is the Kentucky Horse Park near ?"
+  },
+  {
+    "user_id": 98731,
+    "date": "Mar 08, 2024",
+    "label": "location",
+    "instance": "What attracts tourists to Reims ?"
+  },
+  {
+    "user_id": 17002,
+    "date": "Jun 06, 2022",
+    "label": "description and abstract concept",
+    "instance": "What is the Bernoulli Principle ?"
+  },
+  {
+    "user_id": 19523,
+    "date": "Apr 01, 2022",
+    "label": "location",
+    "instance": "What countries does the Mont Blanc Tunnel join ?"
+  },
+  {
+    "user_id": 14920,
+    "date": "Aug 18, 2023",
+    "label": "numeric value",
+    "instance": "What 's the American dollar equivalent for 8 pounds in the U.K. ?"
+  },
+  {
+    "user_id": 82716,
+    "date": "Jan 09, 2025",
+    "label": "numeric value",
+    "instance": "How many people die of tuberculosis yearly ?"
+  },
+  {
+    "user_id": 73621,
+    "date": "Sep 03, 2023",
+    "label": "human being",
+    "instance": "Which of the following people is not associated with Andy Warhol ?"
+  },
+  {
+    "user_id": 48323,
+    "date": "Feb 22, 2023",
+    "label": "numeric value",
+    "instance": "How many Beatles ' records went #1 ?"
+  },
+  {
+    "user_id": 36169,
+    "date": "Nov 26, 2023",
+    "label": "abbreviation",
+    "instance": "What is RAM in the computer ?"
+  },
+  {
+    "user_id": 18971,
+    "date": "Feb 08, 2025",
+    "label": "entity",
+    "instance": "What Tom Wolfe book is about the Mercury astronauts ?"
+  },
+  {
+    "user_id": 33747,
+    "date": "Oct 05, 2022",
+    "label": "location",
+    "instance": "Where can I get information and statistics on countries and nations ?"
+  },
+  {
+    "user_id": 79792,
+    "date": "Jul 03, 2024",
+    "label": "human being",
+    "instance": "Whose cover is that of an employee of Universal Import and Export ?"
+  },
+  {
+    "user_id": 58512,
+    "date": "Dec 19, 2023",
+    "label": "description and abstract concept",
+    "instance": "How does marijuana lead to other drugs ?"
+  },
+  {
+    "user_id": 79706,
+    "date": "Jun 10, 2022",
+    "label": "description and abstract concept",
+    "instance": "What is a rhomboideus minor ?"
+  },
+  {
+    "user_id": 85683,
+    "date": "Dec 27, 2022",
+    "label": "location",
+    "instance": "Where did the Maya people live ?"
+  },
+  {
+    "user_id": 73621,
+    "date": "May 20, 2023",
+    "label": "entity",
+    "instance": "What is the mascot for Notre Dame University ?"
+  },
+  {
+    "user_id": 68721,
+    "date": "Jun 26, 2024",
+    "label": "human being",
+    "instance": "Who designed London Bridge ?"
+  },
+  {
+    "user_id": 98731,
+    "date": "Nov 26, 2022",
+    "label": "description and abstract concept",
+    "instance": "What is the origin of the term `` blue moon , '' and how often do they occur ?"
+  },
+  {
+    "user_id": 66606,
+    "date": "Nov 25, 2022",
+    "label": "numeric value",
+    "instance": "How many different types of skunks are there ?"
+  },
+  {
+    "user_id": 94993,
+    "date": "Jan 16, 2023",
+    "label": "abbreviation",
+    "instance": "What does the word LASER mean ?"
+  },
+  {
+    "user_id": 31800,
+    "date": "Mar 27, 2025",
+    "label": "description and abstract concept",
+    "instance": "How do I tie a tie ?"
+  },
+  {
+    "user_id": 21548,
+    "date": "Aug 05, 2022",
+    "label": "description and abstract concept",
+    "instance": "What else has the swastika stood for ?"
+  },
+  {
+    "user_id": 63002,
+    "date": "Mar 28, 2023",
+    "label": "location",
+    "instance": "Where can I find correct tabs for Third Eye Blind songs ?"
+  },
+  {
+    "user_id": 66606,
+    "date": "Jan 21, 2024",
+    "label": "description and abstract concept",
+    "instance": "What is a urologist ?"
+  },
+  {
+    "user_id": 15136,
+    "date": "Jun 16, 2024",
+    "label": "numeric value",
+    "instance": "How big is the largest diamond ?"
+  },
+  {
+    "user_id": 58512,
+    "date": "Apr 03, 2025",
+    "label": "location",
+    "instance": "What 's the name of the temple that is located near the capital city of Laos ?"
+  },
+  {
+    "user_id": 76161,
+    "date": "May 25, 2025",
+    "label": "human being",
+    "instance": "Who wrote NN DT NNP NNP '' ?"
+  },
+  {
+    "user_id": 32068,
+    "date": "Jul 30, 2023",
+    "label": "numeric value",
+    "instance": "What is the population of Japan ?"
+  },
+  {
+    "user_id": 95006,
+    "date": "Sep 24, 2023",
+    "label": "numeric value",
+    "instance": "On average , how many miles are there to the moon ?"
+  },
+  {
+    "user_id": 66606,
+    "date": "Oct 03, 2023",
+    "label": "entity",
+    "instance": "What are some of Australia 's native flora ?"
+  },
+  {
+    "user_id": 87757,
+    "date": "Dec 30, 2023",
+    "label": "abbreviation",
+    "instance": "What does ` PSI ' stand for ?"
+  },
+  {
+    "user_id": 79706,
+    "date": "Jan 29, 2024",
+    "label": "human being",
+    "instance": "What boxer 's life story is titled Raging Bull ?"
+  },
+  {
+    "user_id": 22890,
+    "date": "Apr 18, 2024",
+    "label": "location",
+    "instance": "What Scandinavian country covers 173 , 732 square miles ?"
+  },
+  {
+    "user_id": 19523,
+    "date": "Nov 30, 2022",
+    "label": "entity",
+    "instance": "What Aesop 's fable has the moral : `` The race is not always to the swift. Slow and steady is bound to win '' ?"
+  },
+  {
+    "user_id": 85683,
+    "date": "Feb 12, 2025",
+    "label": "abbreviation",
+    "instance": "What is DTMF ?"
+  },
+  {
+    "user_id": 95006,
+    "date": "Mar 18, 2024",
+    "label": "description and abstract concept",
+    "instance": "What is the origin of the candy cane at Christmas ?"
+  },
+  {
+    "user_id": 95006,
+    "date": "Jul 03, 2024",
+    "label": "entity",
+    "instance": "What were millions of kids wearing on their heads in 1955 ?"
+  },
+  {
+    "user_id": 24636,
+    "date": "Apr 03, 2025",
+    "label": "description and abstract concept",
+    "instance": "What is Java ?"
+  },
+  {
+    "user_id": 99746,
+    "date": "Sep 01, 2023",
+    "label": "location",
+    "instance": "What 's the world 's longest suspension bridge ?"
+  },
+  {
+    "user_id": 22890,
+    "date": "Dec 22, 2022",
+    "label": "description and abstract concept",
+    "instance": "What is cosmology ?"
+  },
+  {
+    "user_id": 64959,
+    "date": "Apr 29, 2022",
+    "label": "location",
+    "instance": "What country saw the origin of the Asian Flu ?"
+  },
+  {
+    "user_id": 14748,
+    "date": "Sep 24, 2023",
+    "label": "numeric value",
+    "instance": "What amount of money did the Philippine ex-dictator Marcos steal from the treasury ?"
+  },
+  {
+    "user_id": 22890,
+    "date": "Jan 29, 2025",
+    "label": "entity",
+    "instance": "What war did Florence Nightingale tend the troops in ?"
+  },
+  {
+    "user_id": 31800,
+    "date": "Dec 09, 2023",
+    "label": "description and abstract concept",
+    "instance": "What is the origin of the word `` Teddy bear '' ?"
+  },
+  {
+    "user_id": 58512,
+    "date": "Oct 14, 2022",
+    "label": "human being",
+    "instance": "Which of these are authors ?"
+  },
+  {
+    "user_id": 59083,
+    "date": "Apr 25, 2022",
+    "label": "description and abstract concept",
+    "instance": "What does the theory of quantum leaps mean in simpler terms ?"
+  },
+  {
+    "user_id": 66606,
+    "date": "Sep 13, 2023",
+    "label": "numeric value",
+    "instance": "How tall was the animated Frankenstein"
+  },
+  {
+    "user_id": 36121,
+    "date": "Mar 28, 2022",
+    "label": "human being",
+    "instance": "Who painted the Sistine Chapel ?"
+  },
+  {
+    "user_id": 48323,
+    "date": "Jan 18, 2024",
+    "label": "human being",
+    "instance": "What President had never held an elected office until he was elected to the White House ?"
+  },
+  {
+    "user_id": 46625,
+    "date": "Sep 15, 2022",
+    "label": "numeric value",
+    "instance": "Independent silversmith 's account for what percentage of silver production ?"
+  },
+  {
+    "user_id": 85683,
+    "date": "Mar 25, 2024",
+    "label": "location",
+    "instance": "Where was the largest concentration camp in World War II ?"
+  },
+  {
+    "user_id": 26895,
+    "date": "Jan 13, 2024",
+    "label": "human being",
+    "instance": "In the past 8 years who have the MVP players for the NHL been ?"
+  },
+  {
+    "user_id": 32269,
+    "date": "Jan 09, 2023",
+    "label": "description and abstract concept",
+    "instance": "What was The Living Room War ?"
+  },
+  {
+    "user_id": 10508,
+    "date": "Apr 04, 2024",
+    "label": "description and abstract concept",
+    "instance": "What caused the division between the Anglicans and the Vatican ?"
+  },
+  {
+    "user_id": 89807,
+    "date": "Mar 23, 2025",
+    "label": "abbreviation",
+    "instance": "What does pH stand for ?"
+  },
+  {
+    "user_id": 24636,
+    "date": "Mar 04, 2025",
+    "label": "location",
+    "instance": "What is one of the cities that the University of Minnesota is located in ?"
+  },
+  {
+    "user_id": 25875,
+    "date": "May 27, 2023",
+    "label": "human being",
+    "instance": "Who was shot in the back during a Poker game in Deadwood , the Dakota territory ?"
+  },
+  {
+    "user_id": 85683,
+    "date": "May 17, 2023",
+    "label": "location",
+    "instance": "What are the four largest mountain ranges on the Asian continent ?"
+  },
+  {
+    "user_id": 22890,
+    "date": "Jul 05, 2022",
+    "label": "entity",
+    "instance": "Name the men 's cologne that is associated with the sea ."
+  },
+  {
+    "user_id": 97446,
+    "date": "Apr 08, 2025",
+    "label": "description and abstract concept",
+    "instance": "How did former WWF wrestler Rick Rude die ?"
+  },
+  {
+    "user_id": 36169,
+    "date": "Sep 14, 2024",
+    "label": "description and abstract concept",
+    "instance": "What are the factors leading to the high teen pregnancy rate in Spartanburg , South Carolina ?"
+  },
+  {
+    "user_id": 97007,
+    "date": "Nov 19, 2024",
+    "label": "location",
+    "instance": "Where are all European and American eels born ?"
+  },
+  {
+    "user_id": 94418,
+    "date": "Feb 02, 2024",
+    "label": "abbreviation",
+    "instance": "What does IBM stand for ?"
+  },
+  {
+    "user_id": 22890,
+    "date": "Sep 01, 2022",
+    "label": "numeric value",
+    "instance": "How much does the President get paid ?"
+  },
+  {
+    "user_id": 97007,
+    "date": "May 15, 2024",
+    "label": "description and abstract concept",
+    "instance": "What is it like to experience a near death episode ?"
+  },
+  {
+    "user_id": 97044,
+    "date": "Jun 08, 2023",
+    "label": "abbreviation",
+    "instance": "CNN is the abbreviation for what ?"
+  },
+  {
+    "user_id": 40062,
+    "date": "Oct 21, 2022",
+    "label": "numeric value",
+    "instance": "How many feet more than 2 is the average height of the Great Wall of China ?"
+  },
+  {
+    "user_id": 94993,
+    "date": "Feb 05, 2023",
+    "label": "entity",
+    "instance": "What board game does a `` wood-pusher '' play poorly ?"
+  },
+  {
+    "user_id": 34941,
+    "date": "Sep 14, 2024",
+    "label": "description and abstract concept",
+    "instance": "How do you do a bibliography with an unknown author ?"
+  },
+  {
+    "user_id": 87757,
+    "date": "Jan 08, 2025",
+    "label": "abbreviation",
+    "instance": "What does S.O.S. stand for ?"
+  },
+  {
+    "user_id": 69042,
+    "date": "Jan 04, 2023",
+    "label": "entity",
+    "instance": "What oldtime kids ' fare did TV Guide writer Jeff Greenfield call `` one of the most...subversive TV shows in American history '' ?"
+  },
+  {
+    "user_id": 15626,
+    "date": "Jul 04, 2022",
+    "label": "entity",
+    "instance": "What was Jimmy Durante 's theme song ?"
+  },
+  {
+    "user_id": 94993,
+    "date": "Oct 10, 2023",
+    "label": "entity",
+    "instance": "Name the two mystical ravens Odin has at his command ."
+  },
+  {
+    "user_id": 14066,
+    "date": "Apr 20, 2022",
+    "label": "entity",
+    "instance": "What was the name of Sergeant Preston of the Yukon 's lead dog ?"
+  },
+  {
+    "user_id": 69042,
+    "date": "Jan 08, 2024",
+    "label": "location",
+    "instance": "What ocean did the Titanic sink in ?"
+  },
+  {
+    "user_id": 86046,
+    "date": "Apr 28, 2023",
+    "label": "human being",
+    "instance": "What is Larry King 's job ?"
+  },
+  {
+    "user_id": 48323,
+    "date": "Feb 08, 2023",
+    "label": "location",
+    "instance": "When Superman needs to get away from it all , where does he go ?"
+  },
+  {
+    "user_id": 25577,
+    "date": "Jun 05, 2022",
+    "label": "numeric value",
+    "instance": "How many acres in a mile ?"
+  },
+  {
+    "user_id": 75139,
+    "date": "Mar 24, 2022",
+    "label": "location",
+    "instance": "What continent 's second-highest peak is Mont Blanc ?"
+  },
+  {
+    "user_id": 37668,
+    "date": "May 21, 2022",
+    "label": "description and abstract concept",
+    "instance": "Where did the term `` 69 '' come from ?"
+  },
+  {
+    "user_id": 69042,
+    "date": "May 11, 2023",
+    "label": "location",
+    "instance": "What Texas city got its name from the Spanish for `` yellow '' ?"
+  },
+  {
+    "user_id": 57351,
+    "date": "May 20, 2023",
+    "label": "location",
+    "instance": "What landmark Italian restaurant can be found at 239 West 48th Street , New York City ?"
+  },
+  {
+    "user_id": 24636,
+    "date": "Apr 06, 2024",
+    "label": "description and abstract concept",
+    "instance": "What is the meaning of the name Ella ?"
+  },
+  {
+    "user_id": 64959,
+    "date": "Aug 22, 2023",
+    "label": "abbreviation",
+    "instance": "What is SVHS ?"
+  },
+  {
+    "user_id": 95006,
+    "date": "Dec 20, 2022",
+    "label": "numeric value",
+    "instance": "How many holes are there in a tenpin bowling ball ?"
+  },
+  {
+    "user_id": 98731,
+    "date": "Feb 06, 2025",
+    "label": "human being",
+    "instance": "Who is the current UN Secretary General ?"
+  },
+  {
+    "user_id": 73621,
+    "date": "May 02, 2023",
+    "label": "abbreviation",
+    "instance": "What does LOL mean ?"
+  },
+  {
+    "user_id": 64959,
+    "date": "Nov 19, 2022",
+    "label": "entity",
+    "instance": "What was the name of the sitcom that Alyssa Milano starred in with Tony Danza ?"
+  },
+  {
+    "user_id": 29859,
+    "date": "Mar 21, 2025",
+    "label": "numeric value",
+    "instance": "How many sonnets did Shakespeare write ?"
+  },
+  {
+    "user_id": 86046,
+    "date": "Dec 25, 2022",
+    "label": "description and abstract concept",
+    "instance": "What is the purpose of the SysRq key on my computer keyboard ?"
+  },
+  {
+    "user_id": 32068,
+    "date": "Sep 30, 2022",
+    "label": "description and abstract concept",
+    "instance": "How is carbon dioxide removed from natural gas ?"
+  },
+  {
+    "user_id": 48323,
+    "date": "Jul 08, 2023",
+    "label": "entity",
+    "instance": "What is the only animal that can turn its stomach inside out ?"
+  },
+  {
+    "user_id": 22890,
+    "date": "Sep 04, 2023",
+    "label": "description and abstract concept",
+    "instance": "How do boats float ?"
+  },
+  {
+    "user_id": 88007,
+    "date": "Jun 02, 2024",
+    "label": "human being",
+    "instance": "What was the name of the cook on Rawhide ?"
+  },
+  {
+    "user_id": 33747,
+    "date": "Dec 05, 2022",
+    "label": "human being",
+    "instance": "What actor said in A Day at the Races : `` Either he 's dead or my watch has stopped '' ?"
+  },
+  {
+    "user_id": 33129,
+    "date": "Apr 29, 2025",
+    "label": "location",
+    "instance": "What country has the largest sheep population ?"
+  },
+  {
+    "user_id": 86046,
+    "date": "Jan 02, 2025",
+    "label": "description and abstract concept",
+    "instance": "What facial feature typically contains about 55 hairs ?"
+  },
+  {
+    "user_id": 75139,
+    "date": "Dec 23, 2024",
+    "label": "entity",
+    "instance": "What kind of puzzle first appeared in the U.S. in the New York World on December 21 , 1913 ?"
+  },
+  {
+    "user_id": 36169,
+    "date": "Apr 14, 2025",
+    "label": "description and abstract concept",
+    "instance": "How do wasps make their nests ?"
+  },
+  {
+    "user_id": 50032,
+    "date": "Dec 18, 2022",
+    "label": "numeric value",
+    "instance": "What percentage of the silver production is done by independent silversmiths ?"
+  },
+  {
+    "user_id": 82143,
+    "date": "Jul 01, 2022",
+    "label": "abbreviation",
+    "instance": "What is the abbreviation of the company name ` General Motors ' ?"
+  },
+  {
+    "user_id": 15136,
+    "date": "Sep 19, 2022",
+    "label": "human being",
+    "instance": "What actress starred in `` The Lion in Winter '' ?"
+  },
+  {
+    "user_id": 69042,
+    "date": "Oct 14, 2023",
+    "label": "entity",
+    "instance": "What food of the three bears did Goldilocks eat ?"
+  },
+  {
+    "user_id": 31800,
+    "date": "Dec 30, 2023",
+    "label": "numeric value",
+    "instance": "How many claws has a lobster called a pistol lost ?"
+  },
+  {
+    "user_id": 88007,
+    "date": "Mar 22, 2022",
+    "label": "entity",
+    "instance": "What kind of mammal is a colt ?"
+  },
+  {
+    "user_id": 40062,
+    "date": "Jan 27, 2025",
+    "label": "entity",
+    "instance": "What was the name of that popular song the Creeps sang ?"
+  },
+  {
+    "user_id": 22890,
+    "date": "Feb 28, 2024",
+    "label": "numeric value",
+    "instance": "How many colors was the 1940s collectible called a Donald Duck Rubber Boat ?"
+  },
+  {
+    "user_id": 95006,
+    "date": "May 31, 2022",
+    "label": "location",
+    "instance": "Where can I find the history of the Taiwanese language ?"
+  },
+  {
+    "user_id": 39535,
+    "date": "Jan 18, 2025",
+    "label": "abbreviation",
+    "instance": "What does the abbreviation IOC stand for ?"
+  },
+  {
+    "user_id": 18795,
+    "date": "Aug 23, 2022",
+    "label": "numeric value",
+    "instance": "How many movies has Drew Barrymore been in ?"
+  },
+  {
+    "user_id": 97007,
+    "date": "May 23, 2025",
+    "label": "description and abstract concept",
+    "instance": "How can I get someone 's phone number if I only have their screen name ?"
+  },
+  {
+    "user_id": 95006,
+    "date": "Jul 07, 2022",
+    "label": "location",
+    "instance": "What Russian city used to be called St. Petersburg and Petrograd ?"
+  },
+  {
+    "user_id": 15136,
+    "date": "Jul 12, 2024",
+    "label": "entity",
+    "instance": "What does a philatelist collect ?"
+  },
+  {
+    "user_id": 46625,
+    "date": "Jan 21, 2024",
+    "label": "location",
+    "instance": "What country is located at 13 degrees North latitude and 10 degrees East longitude ?"
+  },
+  {
+    "user_id": 87757,
+    "date": "Jun 06, 2024",
+    "label": "human being",
+    "instance": "Who was considered to be the father of psychology ?"
+  },
+  {
+    "user_id": 15626,
+    "date": "Dec 13, 2022",
+    "label": "numeric value",
+    "instance": "How many feet high is the hurdle in front of a runner 's steeplechase water jump ?"
+  },
+  {
+    "user_id": 39978,
+    "date": "Mar 15, 2023",
+    "label": "human being",
+    "instance": "Who markets Spaghetti-o 's ?"
+  },
+  {
+    "user_id": 88007,
+    "date": "Jan 22, 2023",
+    "label": "description and abstract concept",
+    "instance": "How effective are condoms in protecting against AIDS ?"
+  },
+  {
+    "user_id": 24636,
+    "date": "Sep 18, 2024",
+    "label": "description and abstract concept",
+    "instance": "What is the origin of the expression `` four-letter word '' ?"
+  },
+  {
+    "user_id": 46843,
+    "date": "Feb 12, 2025",
+    "label": "abbreviation",
+    "instance": "What does NASA stand for ?"
+  },
+  {
+    "user_id": 97044,
+    "date": "Mar 21, 2022",
+    "label": "entity",
+    "instance": "What was the species of Winnie the Pooh ?"
+  },
+  {
+    "user_id": 20161,
+    "date": "Jan 07, 2023",
+    "label": "numeric value",
+    "instance": "What should the temperature be set at while baking Peachy Oat Muffins ?"
+  },
+  {
+    "user_id": 75139,
+    "date": "Aug 23, 2023",
+    "label": "description and abstract concept",
+    "instance": "What are faults in the earth 's crust ?"
+  },
+  {
+    "user_id": 15136,
+    "date": "Nov 17, 2023",
+    "label": "abbreviation",
+    "instance": "What is the abbreviation for micro ?"
+  },
+  {
+    "user_id": 97044,
+    "date": "Mar 06, 2023",
+    "label": "description and abstract concept",
+    "instance": "How do Ouija Boards work ?"
+  },
+  {
+    "user_id": 64959,
+    "date": "Aug 09, 2024",
+    "label": "location",
+    "instance": "What country is the origin of the band the Creeps ?"
+  },
+  {
+    "user_id": 48389,
+    "date": "Mar 17, 2022",
+    "label": "entity",
+    "instance": "What flower did Vincent Van Gogh paint ?"
+  },
+  {
+    "user_id": 89445,
+    "date": "Jan 20, 2023",
+    "label": "numeric value",
+    "instance": "How many consecutive baseball games did Lou Gehrig play ?"
+  },
+  {
+    "user_id": 94993,
+    "date": "Apr 14, 2024",
+    "label": "location",
+    "instance": "What North American city would you visit to see Cleopatra 's Needle ?"
+  },
+  {
+    "user_id": 95006,
+    "date": "Nov 04, 2023",
+    "label": "location",
+    "instance": "What country did the ancient Romans refer to as Hibernia ?"
+  }
+]
