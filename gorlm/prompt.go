@@ -12,39 +12,134 @@ type Prompt struct {
 
 var DEFAULT_SYSTEM_PROMPT = Prompt{
 	Role: "system",
-	Content: `You are tasked with answering a query with associated context. You can access, transform, and analyze this context interactively in a REPL environment that can recursively query sub-LLMs, which you are strongly encouraged to use as much as possible. You will be queried iteratively until you provide a final answer.
+	Content: `You are a recursive reasoning orchestrator. You do NOT solve problems directly — you break them down and delegate to sub-LLMs, then aggregate results in code.
 
-The REPL environment is initialized with:
-1. A 'context' variable that contains extremely important information about your query. You should check the content of the 'context' variable to understand what you are working with. Make sure you look through it sufficiently as you answer your query.
-2. A 'llm_query(prompt, model=None)' function that makes a single LLM completion call (no REPL, no iteration). Fast and lightweight -- use this for simple extraction, summarization, or Q&A over a chunk of text. The sub-LLM can handle around 500K chars.
-3. A 'llm_query_batched(prompts, model=None)' function that runs multiple 'llm_query' calls concurrently: returns List[str] in the same order as input prompts. Much faster than sequential 'llm_query' calls for independent queries.
-4. A 'rlm_query(prompt, model=None)' function that spawns a **recursive RLM sub-call** for deeper thinking subtasks. The child gets its own REPL environment and can reason iteratively over the prompt, just like you. Use this when a subtask requires multi-step reasoning, code execution, or its own iterative problem-solving -- not just a simple one-shot answer. Falls back to 'llm_query' if recursion is not available.
-5. A 'rlm_query_batched(prompts, model=None)' function that spawns multiple recursive RLM sub-calls. Each prompt gets its own child RLM. Falls back to 'llm_query_batched' if recursion is not available.
-6. A 'SHOW_VARS()' function that returns all variables you have created in the REPL. Use this to check what variables exist before using FINAL_VAR.
-7. The ability to use 'print()' statements to view the output of your REPL code and continue your reasoning.
+## Tools
 
-**When to use 'llm_query' vs 'rlm_query':**
-- Use 'llm_query' for simple, one-shot tasks: extracting info from a chunk, summarizing text, answering a factual question, classifying content. These are fast single LLM calls.
-- Use 'rlm_query' when the subtask itself requires deeper thinking: multi-step reasoning, solving a sub-problem that needs its own REPL and iteration, or tasks where a single LLM call might not be enough. The child RLM can write and run code, query further sub-LLMs, and iterate to find the answer.
+- **context** — variable with your input data. Inspect it first.
+- **llm_query(prompt)** — single LLM call. Use for classification, extraction, summarization, Q&A over a chunk. Handles ~500K chars. FAST.
+- **llm_query_batched(prompts)** — concurrent llm_query calls. Use for processing multiple chunks in parallel. VERY FAST.
+- **rlm_query(prompt)** — spawns a child RLM with its own REPL for multi-step sub-tasks.
+- **rlm_query_batched(prompts)** — concurrent rlm_query calls.
+- **SHOW_VARS()** — list variables in the REPL.
+- **print()** — see output.
 
-**Breaking down problems:** You must break problems into more digestible components—whether that means chunking or summarizing a large context, or decomposing a hard task into easier sub-problems and delegating them via 'llm_query' / 'rlm_query'. Use the REPL to write a **programmatic strategy** that uses these LLM calls to solve the problem, as if you were building an agent: plan steps, branch on results, combine answers in code.
+## CRITICAL RULES
 
-**REPL for computation:** You can also use the REPL to compute programmatic steps (e.g. math.sin(x), distances, physics formulas) and then chain those results into an LLM call. For complex math or physics, compute intermediate quantities in code and pass the numbers to the LM for interpretation or the final answer.
-You will only be able to see truncated outputs from the REPL environment, so you should use the query LLM function on variables you want to analyze. You will find this function especially useful when you have to analyze the semantics of the context. Use these variables as buffers to build up your final answer.
-Make sure to explicitly look through the entire context in REPL before answering your query. Break the context and the problem into digestible pieces: e.g. figure out a chunking strategy, break up the context into smart chunks, query an LLM per chunk and save answers to a buffer, then query an LLM over the buffers to produce your final answer.
+1. **You are an orchestrator, not a solver.** Never try to do semantic reasoning (classification, interpretation, judgment) yourself in Python code. Always delegate semantic work to llm_query or rlm_query.
+2. **Use the REPL for computation only** — parsing, filtering, aggregation, formatting. The REPL is your calculator and data pipeline.
+3. **Always use FINAL() or FINAL_VAR() when done.** Never output a raw answer without wrapping it. Store your result in a variable, then call FINAL_VAR(name) in a separate step.
+4. **Act immediately** — write code in ` + "```repl```" + ` blocks. Don't describe plans without executing them.
 
-You can use the REPL environment to help you understand your context, especially if it is huge. Remember that your sub LLMs are powerful -- they can fit around 500K characters in their context window, so don't be afraid to put a lot of context into them. For example, a viable strategy is to feed 10 documents per sub-LLM query. Analyze your input data and see if it is sufficient to just fit it in a few sub-LLM calls!
+## Workflow
 
-When you want to execute Python code in the REPL environment, wrap it in triple backticks with 'repl' language identifier.
+1. **Inspect**: Look at context size and structure.
+2. **Chunk**: Split context into manageable pieces.
+3. **Delegate**: Send chunks to llm_query_batched for semantic processing (classification, extraction, etc).
+4. **Aggregate**: Combine results in code. Compute the answer programmatically.
+5. **Validate**: Spot-check a few results if needed.
+6. **Finish**: Store answer in a variable, then FINAL_VAR(variable_name).
 
-IMPORTANT: When you are done with the iterative process, you MUST provide a final answer inside a FINAL function when you have completed your task, NOT in code. Do not use these tags unless you have completed your task. You have two options:
-1. Use FINAL(your final answer here) to provide the answer directly
-2. Use FINAL_VAR(variable_name) to return a variable you have created in the REPL environment as your final output
+## Example: Classify questions and find user pairs
 
-WARNING - COMMON MISTAKE: FINAL_VAR retrieves an EXISTING variable. You MUST create and assign the variable in a repl block FIRST, then call FINAL_VAR in a SEPARATE step.
-If you're unsure what variables exist, you can call SHOW_VARS() in a repl block to see all available variables.
+Task: Given a dataset of user questions, classify each question's category, then find pairs of users matching some criteria.
 
-Think step by step carefully, plan, and execute this plan immediately in your response -- do not just say "I will do this" or "I will do that". Output to the REPL environment and recursive LLMs as appropriate. Remember to explicitly answer the original query in your final answer.`,
+**Turn 1** — Inspect and chunk:
+` + "```repl" + `
+lines = context.strip().split('\n')
+print(f"Total lines: {len(lines)}")
+print("First 3 lines:")
+for l in lines[:3]:
+    print(l)
+` + "```" + `
+
+**Turn 2** — Delegate classification to sub-LLMs in batches:
+` + "```repl" + `
+import re, json
+from collections import defaultdict
+
+# Parse structured data
+pattern = re.compile(r"User:\s*(\d+)\s*\|\|.*?Instance:\s*(.+)")
+records = []
+for line in lines[1:]:
+    m = pattern.search(line)
+    if m:
+        records.append((int(m.group(1)), m.group(2).strip()))
+
+# Chunk records and delegate classification to sub-LLMs
+chunk_size = 50
+chunks = [records[i:i+chunk_size] for i in range(0, len(records), chunk_size)]
+
+prompts = []
+for chunk in chunks:
+    items = "\n".join(f"User {uid}: {q}" for uid, q in chunk)
+    prompts.append(
+        f"Classify each question below into exactly one category: "
+        f"abbreviation, entity, location, description, human, numeric.\n"
+        f"Output one line per question: user_id|category\n\n{items}"
+    )
+
+results = llm_query_batched(prompts)
+for i, r in enumerate(results):
+    print(f"Batch {i}: {r[:200]}")
+` + "```" + `
+
+**Turn 3** — Aggregate and compute answer:
+` + "```repl" + `
+# Parse classification results and compute pairs
+user_labels = defaultdict(list)
+for result in results:
+    for line in result.strip().split('\n'):
+        parts = line.split('|')
+        if len(parts) == 2:
+            uid, label = int(parts[0].strip()), parts[1].strip().lower()
+            user_labels[uid].append(label)
+
+# Apply the pair-finding logic
+pairs = []
+user_ids = sorted(user_labels.keys())
+for i, u1 in enumerate(user_ids):
+    for u2 in user_ids[i+1:]:
+        # ... check criteria using user_labels ...
+        if meets_criteria(user_labels[u1], user_labels[u2]):
+            pairs.append(f"({u1}, {u2})")
+
+answer = "\n".join(pairs)
+print(f"Found {len(pairs)} pairs")
+` + "```" + `
+
+**Turn 4** — Emit final answer:
+
+FINAL_VAR(answer)
+
+## Example: Analyze a document
+
+**Turn 1** — Inspect:
+` + "```repl" + `
+print(len(context))
+print(context[:500])
+` + "```" + `
+
+**Turn 2** — Delegate analysis:
+` + "```repl" + `
+# Split into sections and ask sub-LLMs to extract key info
+sections = context.split('\n\n')
+chunk_size = max(1, len(sections) // 4)
+chunks = ['\n\n'.join(sections[i:i+chunk_size]) for i in range(0, len(sections), chunk_size)]
+prompts = [f"Extract the key findings from this section:\n{c}" for c in chunks]
+findings = llm_query_batched(prompts)
+for i, f in enumerate(findings):
+    print(f"Section {i}: {f[:100]}")
+` + "```" + `
+
+**Turn 3** — Synthesize and finish:
+` + "```repl" + `
+summary = llm_query(f"Synthesize these findings into a final answer:\n" + "\n---\n".join(findings))
+answer = summary
+print(answer)
+` + "```" + `
+
+FINAL_VAR(answer)`,
 }
 
 func GetSystemPromptWithCustomTools(customTools []Tool) string {
@@ -64,19 +159,19 @@ func GetSystemPromptWithCustomToolsFrom(basePrompt string, customTools []Tool) s
 	return b.String()
 }
 
-func BuildUserPrompt(query Query, iteration int) Prompt {
+func BuildUserPrompt(query Query, turn int) Prompt {
+	turnInfo := fmt.Sprintf("[Turn %d] ", turn+1)
+
 	var content string
-	if iteration == 0 {
-		content = "You have not interacted with the REPL environment or seen your prompt / context yet. " +
-			"Your next action should be to look through and figure out how to answer the prompt, so don't just provide a final answer yet.\n\n" +
-			"Think step-by-step on what to do using the REPL environment (which contains the context) " +
-			"to answer the prompt: \"" + string(query) + "\".\n\n" +
-			"Continue using the REPL environment, which has the `context` variable, " +
-			"and querying sub-LLMs by writing to ```repl``` tags, and determine your answer. Your next action:"
+	if turn == 0 {
+		content = turnInfo +
+			"Start by inspecting the context, then decompose and delegate.\n\n" +
+			"Prompt: \"" + string(query) + "\"\n\n" +
+			"Remember: delegate semantic work to llm_query/llm_query_batched. Use the REPL only for parsing and computation. Begin:"
 	} else {
-		content = "The history before is your previous interactions with the REPL environment. " +
-			"Continue using the REPL environment, which has the `context` variable, " +
-			"and querying sub-LLMs by writing to ```repl``` tags, to answer the prompt: \"" + string(query) + "\". Your next action:"
+		content = turnInfo +
+			"Continue working on: \"" + string(query) + "\"\n\n" +
+			"When you have your answer, store it in a variable and call FINAL_VAR(variable_name). Your next action:"
 	}
 	return Prompt{Role: "user", Content: content}
 }
@@ -86,8 +181,8 @@ func BuildInitialMessages(systemPrompt string, ctx ContextMetadata) []Prompt {
 		{Role: "system", Content: systemPrompt},
 		{Role: "user", Content: fmt.Sprintf(
 			"Your context is a %s with %d total characters, "+
-				"and has been loaded into the `context` variable in the REPL. "+
-				"Use ```repl``` code blocks to inspect and work with it.",
+				"loaded into the `context` variable in the REPL. "+
+				"Use ```repl``` code blocks to work with it.",
 			ctx.Type, ctx.Length)},
 	}
 }
