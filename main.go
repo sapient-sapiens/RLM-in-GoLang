@@ -138,6 +138,7 @@ func resolveDataset(key string) (string, error) {
 	return spec.Path, nil
 }
 
+// teeWriter writes to both an underlying os.File (for terminal) and a log file.
 type teeWriter struct {
 	terminal *os.File
 	logFile  *os.File
@@ -151,6 +152,8 @@ func (t *teeWriter) Write(p []byte) (int, error) {
 	return n, err
 }
 
+// setupRunLog creates a timestamped log file and replaces os.Stdout and
+// os.Stderr with tee writers so all terminal output is also persisted to disk.
 func setupRunLog(dir string) (*os.File, error) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return nil, fmt.Errorf("create log dir: %w", err)
@@ -189,7 +192,9 @@ func setupRunLog(dir string) (*os.File, error) {
 
 func main() {
 	tasksFlag := flag.String("tasks", "", "comma-separated task numbers to run (1-20), e.g. '11,14,16'")
-	itersFlag := flag.Int("iters", 10, "max RLM iterations per task")
+	budgetFlag := flag.Int64("budget", 500000, "max total tokens per task (safety guard)")
+	depthFlag := flag.Int("depth", 3, "max recursion depth for rlm_query sub-calls")
+	maxTurnsFlag := flag.Int("max_turns", 50, "max conversation turns (safety guard, 0=unlimited)")
 	datasetFlag := flag.String("dataset", defaultOolongDatasetKey, "dataset size preset to use: 16k or 65k")
 	logDirFlag := flag.String("log_dir", "logs", "directory to save run logs")
 	predsFlag := flag.String("preds_dir", "", "directory to save prediction files for evaluation (task_<n>.txt)")
@@ -200,6 +205,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Warning: could not set up log file: %v\n", err)
 	} else {
 		defer func() {
+			// Close pipe writers to flush tee goroutines, then close log file.
 			os.Stdout.Close()
 			os.Stderr.Close()
 			time.Sleep(50 * time.Millisecond)
@@ -236,14 +242,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	effort := shared.ReasoningEffortLow
+	effort := shared.ReasoningEffortMedium
 	client := myrlm.NewOpenAIClient(myrlm.ClientConfig{
 		Model:        myrlm.SharedModel(oolongModel),
 		ReasoningEff: &effort,
 	})
 
 	rlm := myrlm.NewRLM(client,
-		myrlm.WithMaxIterations(*itersFlag),
+		myrlm.WithMaxDepth(*depthFlag),
+		myrlm.WithMaxBudget(*budgetFlag),
+		myrlm.WithMaxTurns(*maxTurnsFlag),
 		myrlm.WithDockerConfig(myrlm.DockerConfig{
 			Model: oolongModel,
 		}),
@@ -253,7 +261,8 @@ func main() {
 
 	fmt.Println("═══════════════════════════════════════════════════════════════")
 	fmt.Printf("  OOLONG-Pairs Benchmark — tasks %v — model: %s\n", taskNums, oolongModel)
-	fmt.Printf("  Context: %d chars (%s dataset) — max iters: %d\n", len(contextText), example.Dataset, *itersFlag)
+	fmt.Printf("  Context: %d chars (%s dataset) — budget: %dk tokens — depth: %d — max turns: %d\n",
+		len(contextText), example.Dataset, *budgetFlag/1000, *depthFlag, *maxTurnsFlag)
 	fmt.Println("═══════════════════════════════════════════════════════════════")
 	fmt.Println()
 
