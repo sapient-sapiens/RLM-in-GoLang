@@ -80,71 +80,121 @@ func (r *RLM) completion(ctx context.Context, rlmCtx Context, query Query, start
 	}
 
 	userMessages := []Prompt{initialMessages[1], userPrompt}
-	log.Printf("[RLM] calling LLM (depth=%d, ~%d chars)...", r.maxDepth, promptChars(userMessages))
-	callStart := time.Now()
+	const maxRepairAttempts = 2
 
-	result, err := chat.SendMessages(ctx, userMessages)
-	if err != nil {
-		return "", fmt.Errorf("LLM call: %w", err)
-	}
+	lastResponse := ""
+	lastCode := ""
+	lastErr := ""
 
-	response := result.Text
-	codeBlocks := findCodeBlocks(response)
-
-	preview := response
-	if len(preview) > 300 {
-		preview = preview[:300] + "..."
-	}
-	log.Printf("[RLM depth=%d] LLM responded in %s (%d chars, %d code blocks, %d tokens)\n  Response: %s",
-		r.maxDepth, time.Since(callStart).Round(time.Millisecond), len(response), len(codeBlocks),
-		result.Stats.Tokens.TotalTokens, preview)
-
-	// Execute all code blocks from the single response.
-	// The model's code may call rlm_query() which triggers recursive
-	// Completion calls via the HTTP server — that's where recursion lives.
-	for i, code := range codeBlocks {
-		log.Printf("[RLM depth=%d] executing code block %d/%d (%d chars)...", r.maxDepth, i+1, len(codeBlocks), len(code))
-		replResult, execErr := repl.ExecuteCode(code)
-
-		if execErr != nil {
-			log.Printf("[RLM depth=%d] code block %d exec error: %v", r.maxDepth, i+1, execErr)
+	for attempt := 0; attempt <= maxRepairAttempts; attempt++ {
+		if attempt == 0 {
+			log.Printf("[RLM] calling LLM (depth=%d, ~%d chars)...", r.maxDepth, promptChars(userMessages))
+		} else {
+			log.Printf("[RLM depth=%d] retrying after execution failure (attempt %d/%d)...", r.maxDepth, attempt, maxRepairAttempts)
 		}
-		if replResult != nil && strings.TrimSpace(replResult.Stderr) != "" {
-			log.Printf("[RLM depth=%d] code block %d stderr: %.200s", r.maxDepth, i+1, replResult.Stderr)
+		callStart := time.Now()
+
+		result, err := chat.SendMessages(ctx, userMessages)
+		if err != nil {
+			return "", fmt.Errorf("LLM call: %w", err)
 		}
 
-		if replResult != nil && replResult.FinalAnswer != "" {
-			log.Printf("[RLM depth=%d] FINAL answer from code block %d: %.100s", r.maxDepth, i+1, replResult.FinalAnswer)
-			return replResult.FinalAnswer, nil
-		}
+		response := result.Text
+		lastResponse = response
+		codeBlocks := findCodeBlocks(response)
 
-		if replResult != nil {
-			formatted := FormatREPLResult(replResult)
-			if len(formatted) > 200 {
-				formatted = formatted[:200] + "..."
+		preview := response
+		if len(preview) > 300 {
+			preview = preview[:300] + "..."
+		}
+		log.Printf("[RLM depth=%d] LLM responded in %s (%d chars, %d code blocks, %d tokens)\n  Response: %s",
+			r.maxDepth, time.Since(callStart).Round(time.Millisecond), len(response), len(codeBlocks),
+			result.Stats.Tokens.TotalTokens, preview)
+
+		attemptHadError := false
+		lastCode = ""
+		lastErr = ""
+
+		// Execute all code blocks from the response.
+		for i, code := range codeBlocks {
+			log.Printf("[RLM depth=%d] executing code block %d/%d (%d chars)...", r.maxDepth, i+1, len(codeBlocks), len(code))
+			replResult, execErr := repl.ExecuteCode(code)
+
+			if execErr != nil {
+				attemptHadError = true
+				lastCode = code
+				lastErr = execErr.Error()
+				log.Printf("[RLM depth=%d] code block %d exec error: %v", r.maxDepth, i+1, execErr)
 			}
-			log.Printf("[RLM depth=%d] code block %d output: %s", r.maxDepth, i+1, formatted)
+			if replResult != nil && strings.TrimSpace(replResult.Stderr) != "" {
+				attemptHadError = true
+				lastCode = code
+				lastErr = replResult.Stderr
+				log.Printf("[RLM depth=%d] code block %d stderr: %.200s", r.maxDepth, i+1, replResult.Stderr)
+			}
+
+			if replResult != nil && replResult.FinalAnswer != "" {
+				log.Printf("[RLM depth=%d] FINAL answer from code block %d: %.100s", r.maxDepth, i+1, replResult.FinalAnswer)
+				return replResult.FinalAnswer, nil
+			}
+
+			if replResult != nil {
+				formatted := FormatREPLResult(replResult)
+				if len(formatted) > 200 {
+					formatted = formatted[:200] + "..."
+				}
+				log.Printf("[RLM depth=%d] code block %d output: %s", r.maxDepth, i+1, formatted)
+			}
+		}
+
+		// Check for FINAL()/FINAL_VAR() in the LLM text (outside code blocks).
+		if answer, findErr := findFinalAnswer(response); findErr == nil {
+			log.Printf("[RLM depth=%d] FINAL() found in response text: %.100s", r.maxDepth, answer)
+			return answer, nil
+		}
+		if varName, ok := findFinalVar(response); ok {
+			log.Printf("[RLM depth=%d] FINAL_VAR(%s) found in response text, resolving...", r.maxDepth, varName)
+			if res, execErr := repl.ExecuteCode(fmt.Sprintf("FINAL_VAR(%q)", varName)); execErr == nil && res != nil && res.FinalAnswer != "" {
+				return res.FinalAnswer, nil
+			}
+		}
+
+		if attempt == maxRepairAttempts {
+			break
+		}
+
+		if !attemptHadError && len(codeBlocks) > 0 {
+			// Model produced runnable code but no final answer; do one repair attempt.
+			lastCode = codeBlocks[len(codeBlocks)-1]
+			lastErr = "No FINAL(...) value was produced."
+		} else if len(codeBlocks) == 0 {
+			lastErr = "No ```repl``` code block was returned."
+		}
+
+		repairPrompt := Prompt{
+			Role: "user",
+			Content: "Your previous attempt failed. Fix it and return exactly one corrected ```repl``` code block.\n\n" +
+				"Requirements:\n" +
+				"- Preserve the same task intent.\n" +
+				"- Ensure the code executes without syntax/runtime errors.\n" +
+				"- End with FINAL(answer).\n\n" +
+				"Previous assistant response (truncated):\n" + truncateForDebug(lastResponse, 3500) + "\n\n" +
+				"Code that was executed (truncated):\n```repl\n" + truncateForDebug(lastCode, 2500) + "\n```\n\n" +
+				"Observed error:\n" + truncateForDebug(lastErr, 1500),
+		}
+		userMessages = []Prompt{
+			initialMessages[1],
+			userPrompt,
+			{Role: "assistant", Content: truncateForDebug(lastResponse, 5000)},
+			repairPrompt,
 		}
 	}
 
-	// Check for FINAL()/FINAL_VAR() in the LLM's text (outside code blocks)
-	if answer, findErr := findFinalAnswer(response); findErr == nil {
-		log.Printf("[RLM depth=%d] FINAL() found in response text: %.100s", r.maxDepth, answer)
-		return answer, nil
-	}
-	if varName, ok := findFinalVar(response); ok {
-		log.Printf("[RLM depth=%d] FINAL_VAR(%s) found in response text, resolving...", r.maxDepth, varName)
-		if res, execErr := repl.ExecuteCode(fmt.Sprintf("FINAL_VAR(%q)", varName)); execErr == nil && res != nil && res.FinalAnswer != "" {
-			return res.FinalAnswer, nil
-		}
-	}
-
-	// Fallback: return the raw LLM response if it has content
-	if trimmed := strings.TrimSpace(response); trimmed != "" {
-		log.Printf("[RLM depth=%d] no FINAL found — returning raw LLM response as fallback", r.maxDepth)
+	// Final fallback: return last model text if non-empty.
+	if trimmed := strings.TrimSpace(lastResponse); trimmed != "" {
+		log.Printf("[RLM depth=%d] no FINAL found after retries — returning raw LLM response as fallback", r.maxDepth)
 		return trimmed, nil
 	}
-
 	return "", errors.New("completion produced no answer")
 }
 
@@ -154,4 +204,11 @@ func promptChars(msgs []Prompt) int {
 		n += len(m.Content)
 	}
 	return n
+}
+
+func truncateForDebug(s string, max int) string {
+	if max <= 0 || len(s) <= max {
+		return s
+	}
+	return s[:max] + "\n...[truncated]..."
 }
