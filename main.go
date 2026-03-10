@@ -102,6 +102,7 @@ var oolongDatasets = map[string]oolongDatasetSpec{
 //   - asymmetric constraints ("one user has X, the other has Y")
 //   - exact-count requirements ("exactly one", "exactly two")
 //   - date filters combined with the above
+//
 // Tasks 11, 14, 16, 19, 20 (1-indexed).
 var hardTasks = []int{11, 14, 16, 19, 20}
 
@@ -197,6 +198,8 @@ func main() {
 	datasetFlag := flag.String("dataset", defaultOolongDatasetKey, "dataset size preset to use: 16k or 65k")
 	logDirFlag := flag.String("log_dir", "logs", "directory to save run logs")
 	predsFlag := flag.String("preds_dir", "", "directory to save prediction files for evaluation (task_<n>.txt)")
+	reuseDockerFlag := flag.Bool("reuse_docker", true, "reuse Docker REPL container across top-level tasks")
+	batchWorkersFlag := flag.Int("batch_workers", 6, "max concurrent workers used by llm_query_batched inside Docker REPL")
 	flag.Parse()
 
 	logFile, err := setupRunLog(*logDirFlag)
@@ -250,10 +253,13 @@ func main() {
 	rlm := myrlm.NewRLM(client,
 		myrlm.WithMaxDepth(*depthFlag),
 		myrlm.WithMaxBudget(*budgetFlag),
+		myrlm.WithReuseDocker(*reuseDockerFlag),
 		myrlm.WithDockerConfig(myrlm.DockerConfig{
-			Model: oolongModel,
+			Model:        oolongModel,
+			BatchWorkers: *batchWorkersFlag,
 		}),
 	)
+	defer rlm.Close()
 
 	contextText := example.ContextWindowText
 
