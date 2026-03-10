@@ -194,7 +194,6 @@ func main() {
 	tasksFlag := flag.String("tasks", "", "comma-separated task numbers to run (1-20), e.g. '11,14,16'")
 	budgetFlag := flag.Int64("budget", 500000, "max total tokens per task (safety guard)")
 	depthFlag := flag.Int("depth", 3, "max recursion depth for rlm_query sub-calls")
-	maxTurnsFlag := flag.Int("max_turns", 50, "max conversation turns (safety guard, 0=unlimited)")
 	datasetFlag := flag.String("dataset", defaultOolongDatasetKey, "dataset size preset to use: 16k or 65k")
 	logDirFlag := flag.String("log_dir", "logs", "directory to save run logs")
 	predsFlag := flag.String("preds_dir", "", "directory to save prediction files for evaluation (task_<n>.txt)")
@@ -251,7 +250,6 @@ func main() {
 	rlm := myrlm.NewRLM(client,
 		myrlm.WithMaxDepth(*depthFlag),
 		myrlm.WithMaxBudget(*budgetFlag),
-		myrlm.WithMaxTurns(*maxTurnsFlag),
 		myrlm.WithDockerConfig(myrlm.DockerConfig{
 			Model: oolongModel,
 		}),
@@ -261,8 +259,8 @@ func main() {
 
 	fmt.Println("═══════════════════════════════════════════════════════════════")
 	fmt.Printf("  OOLONG-Pairs Benchmark — tasks %v — model: %s\n", taskNums, oolongModel)
-	fmt.Printf("  Context: %d chars (%s dataset) — budget: %dk tokens — depth: %d — max turns: %d\n",
-		len(contextText), example.Dataset, *budgetFlag/1000, *depthFlag, *maxTurnsFlag)
+	fmt.Printf("  Context: %d chars (%s dataset) — budget: %dk tokens — depth: %d\n",
+		len(contextText), example.Dataset, *budgetFlag/1000, *depthFlag)
 	fmt.Println("═══════════════════════════════════════════════════════════════")
 	fmt.Println()
 

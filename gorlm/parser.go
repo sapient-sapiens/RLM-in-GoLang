@@ -8,8 +8,8 @@ import (
 
 var (
 	codeBlockPattern = regexp.MustCompile("(?s)```(?:repl|python)\\s*\\n(.*?)\\n```")
-	finalPattern     = regexp.MustCompile(`(?ms)^\s*FINAL\((.*)\)\s*$`)
-	finalVarPattern  = regexp.MustCompile(`(?ms)^\s*FINAL_VAR\(["']?(\w+)["']?\)\s*$`)
+	finalPattern     = regexp.MustCompile(`(?m)^\s*FINAL\((.*?)\)\s*$`)
+	finalVarPattern  = regexp.MustCompile(`(?m)^\s*FINAL_VAR\(["']?(\w+)["']?\)\s*$`)
 )
 
 func findCodeBlocks(text string) []string {
@@ -24,8 +24,15 @@ func findCodeBlocks(text string) []string {
 	return blocks
 }
 
+// stripCodeBlocks removes fenced code blocks so FINAL/FINAL_VAR
+// matches only fire on prose text, not inside ```repl``` blocks.
+func stripCodeBlocks(text string) string {
+	return codeBlockPattern.ReplaceAllString(text, "")
+}
+
 func findFinalAnswer(text string) (string, error) {
-	if match := finalPattern.FindStringSubmatch(text); len(match) > 1 {
+	cleaned := stripCodeBlocks(text)
+	if match := finalPattern.FindStringSubmatch(cleaned); len(match) > 1 {
 		return match[1], nil
 	}
 	return "", errors.New("no final answer found")
@@ -33,7 +40,8 @@ func findFinalAnswer(text string) (string, error) {
 
 // findFinalVar detects FINAL_VAR(name) in raw response text (outside code blocks).
 func findFinalVar(text string) (string, bool) {
-	if match := finalVarPattern.FindStringSubmatch(text); len(match) > 1 {
+	cleaned := stripCodeBlocks(text)
+	if match := finalVarPattern.FindStringSubmatch(cleaned); len(match) > 1 {
 		return match[1], true
 	}
 	return "", false

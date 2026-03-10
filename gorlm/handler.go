@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/openai/openai-go/v3/shared"
 )
@@ -94,23 +96,31 @@ func (s *REPLServer) handleRLMQuery(w http.ResponseWriter, r *http.Request) {
 	if req.Depth != nil {
 		depth = *req.Depth
 	}
+
+	promptPreview := strings.TrimSpace(req.Prompt)
+	if len(promptPreview) > 120 {
+		promptPreview = promptPreview[:120] + "..."
+	}
+	modelStr := "default"
+	if req.Model != nil && *req.Model != "" {
+		modelStr = *req.Model
+	}
+
 	if depth <= 0 {
-		// Depth exhausted — fall back to a plain LLM call.
+		log.Printf("[RLM] rlm_query received → depth exhausted, falling back to plain LLM (model=%s)\n  Prompt: %s", modelStr, promptPreview)
 		client := s.clientForModel(req.Model)
 		result, err := client.Query(r.Context(), req.Prompt)
 		if err != nil {
+			log.Printf("[RLM] rlm_query plain-LLM error: %v", err)
 			writeJSON(w, http.StatusInternalServerError, queryResponse{Error: err.Error()})
 			return
 		}
+		log.Printf("[RLM] rlm_query plain-LLM response: %d chars", len(result.Text))
 		writeJSON(w, http.StatusOK, queryResponse{Text: result.Text})
 		return
 	}
 
-	child := *s.rlm
-	child.maxDepth = depth - 1
-	if req.Model != nil && *req.Model != "" {
-		child.client = s.clientForModel(req.Model)
-	}
+	childDepth := depth - 1
 	childCtx := req.Context
 	if childCtx == nil {
 		childCtx = req.Prompt
@@ -126,15 +136,25 @@ func (s *REPLServer) handleRLMQuery(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	log.Printf("[RLM] rlm_query received (depth %d→%d, model=%s, ctx=%d chars)\n  Prompt: %s", depth, childDepth, modelStr, ctxLen, promptPreview)
+
+	child := *s.rlm
+	child.maxDepth = childDepth
+	if req.Model != nil && *req.Model != "" {
+		child.client = s.clientForModel(req.Model)
+	}
+
 	answer, err := child.completion(r.Context(), Context{
 		Content:  childCtx,
 		Metadata: ContextMetadata{Type: "string", Length: ctxLen, Depth: child.maxDepth},
 	}, Query(req.Prompt), false)
 	if err != nil {
+		log.Printf("[RLM] rlm_query completion error: %v", err)
 		writeJSON(w, http.StatusInternalServerError, queryResponse{Error: err.Error()})
 		return
 	}
 
+	log.Printf("[RLM] rlm_query returned (depth %d→%d): %d chars", depth, childDepth, len(answer))
 	writeJSON(w, http.StatusOK, queryResponse{Text: answer})
 }
 

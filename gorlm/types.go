@@ -13,8 +13,6 @@ import (
 
 const (
 	DefaultMaxDepth          = 3
-	DefaultMaxTurns          = 50
-	DefaultMaxConsecErrors   = 5
 	DefaultTokenBudget int64 = 500_000
 )
 
@@ -53,11 +51,9 @@ type ContextMetadata struct {
 
 type RLM struct {
 	maxDepth     int
-	maxTurns     int
 	maxTimeout   *float64
 	maxTokens    *int64
 	maxBudget    int64
-	maxErrors    int
 	customTools  []Tool
 	dockerConfig DockerConfig
 	client       *OpenAIClient

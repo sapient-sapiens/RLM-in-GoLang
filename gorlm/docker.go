@@ -70,6 +70,7 @@ func (d *DockerREPL) startContainer() error {
 
 	out, err := exec.Command("docker", "run", "-d", "--rm",
 		"--add-host=host.docker.internal:host-gateway",
+		"--memory=2g",
 		"-v", d.tempDir+":/workspace",
 		"-e", "RLM_SERVER_PORT="+serverPort,
 		d.image,
@@ -234,7 +235,7 @@ def llm_query(prompt, model=None):
     return resp.get("text") or resp.get("error", "Unknown error")
 
 def llm_query_batched(prompts, model=None):
-    with concurrent.futures.ThreadPoolExecutor(max_workers=min(len(prompts), 8)) as pool:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=min(len(prompts), 4)) as pool:
         futures = [pool.submit(llm_query, p, model) for p in prompts]
         return [f.result() for f in futures]
 
@@ -287,6 +288,10 @@ _locals = load_state()
 _final_answer = [None]
 _combined_ref = [None]
 
+def FINAL(value):
+    _final_answer[0] = str(value)
+    return _final_answer[0]
+
 def FINAL_VAR(name):
     name = name.strip().strip("\"'")
     ns = _combined_ref[0] if _combined_ref[0] is not None else _locals
@@ -311,6 +316,7 @@ _globals = {
     "llm_query_batched": llm_query_batched,
     "rlm_query": rlm_query,
     "rlm_query_batched": rlm_query_batched,
+    "FINAL": FINAL,
     "FINAL_VAR": FINAL_VAR,
     "SHOW_VARS": SHOW_VARS,
 }
