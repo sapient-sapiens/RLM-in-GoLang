@@ -21,9 +21,6 @@ type PipelineMode int
 const (
 	PipelineStandard PipelineMode = iota
 	PipelineCompact
-	PipelineEager
-	PipelineLean
-	PipelineEagerLean
 )
 
 type RLM struct {
@@ -76,12 +73,6 @@ func WithPipelineMode(mode PipelineMode) RLMOption {
 // a FINAL answer is found.
 func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (string, error) {
 	switch r.pipelineMode {
-	case PipelineEager:
-		return r.completionEager(ctx, rlmCtx, query, true)
-	case PipelineLean:
-		return r.completionLean(ctx, rlmCtx, query, true)
-	case PipelineEagerLean:
-		return r.completionEagerLean(ctx, rlmCtx, query, true)
 	case PipelineCompact:
 		return r.completionCompacted(ctx, rlmCtx, query, true)
 	default:
@@ -197,8 +188,8 @@ func (r *RLM) completion(ctx context.Context, rlmCtx Context, query Query, start
 			}
 
 			formatted := FormatREPLResult(replResult)
-			if len(formatted) > 20000 {
-				formatted = formatted[:20000] + fmt.Sprintf("... + [%d chars...]", len(formatted)-20000)
+			if len(formatted) > 40000 {
+				formatted = formatted[:40000] + fmt.Sprintf("... + [%d chars...]", len(formatted)-40000)
 			}
 			log.Printf("[RLM] iter %d — code block %d output: %.200s", i+1, j+1, formatted)
 			newUserMessages = append(newUserMessages, Prompt{
@@ -383,8 +374,8 @@ func (r *RLM) completionCompacted(ctx context.Context, rlmCtx Context, query Que
 			lastRec := ledger[len(ledger)-1]
 			recentMsg := fmt.Sprintf("[Turn %d completed] Your code produced this output:\n\n%s",
 				lastRec.Turn, lastTurnOutput)
-			if len(recentMsg) > 20000 {
-				recentMsg = recentMsg[:20000] + "... [truncated]"
+			if len(recentMsg) > 40000 {
+				recentMsg = recentMsg[:40000] + "... [truncated]"
 			}
 			messages = append(messages, Prompt{
 				Role:    "user",
@@ -458,8 +449,8 @@ func (r *RLM) completionCompacted(ctx context.Context, rlmCtx Context, query Que
 			}
 
 			formatted := FormatREPLResult(replResult)
-			if len(formatted) > 20000 {
-				formatted = formatted[:20000] + fmt.Sprintf("... + [%d chars...]", len(formatted)-20000)
+			if len(formatted) > 40000 {
+				formatted = formatted[:40000] + fmt.Sprintf("... + [%d chars...]", len(formatted)-40000)
 			}
 			log.Printf("[RLM-compact] iter %d — code block %d output: %.200s", i+1, j+1, formatted)
 			combinedOutput.WriteString(formatted)
@@ -525,8 +516,8 @@ func (r *RLM) completionCompacted(ctx context.Context, rlmCtx Context, query Que
 		})
 		if lastTurnOutput != "" {
 			recentMsg := fmt.Sprintf("[Most recent output from Turn %d]:\n%s", ledger[len(ledger)-1].Turn, lastTurnOutput)
-			if len(recentMsg) > 20000 {
-				recentMsg = recentMsg[:20000] + "... [truncated]"
+			if len(recentMsg) > 40000 {
+				recentMsg = recentMsg[:40000] + "... [truncated]"
 			}
 			fallbackMessages = append(fallbackMessages, Prompt{
 				Role:    "user",

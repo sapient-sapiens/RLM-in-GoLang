@@ -286,18 +286,21 @@ def _safe_context_payload():
     except:
         return str(ctx)
 
-def rlm_query(prompt, model=None):
+_INHERIT = object()
+
+def rlm_query(prompt, model=None, context=_INHERIT):
+    ctx = _safe_context_payload() if context is _INHERIT else context
     resp = _post("/rlm_query", {
         "prompt": str(prompt),
         "model": model,
         "depth": _RLM_DEPTH,
-        "context": _safe_context_payload(),
+        "context": ctx,
     })
     return resp.get("text") or resp.get("error", "Unknown error")
 
-def rlm_query_batched(prompts, model=None):
+def rlm_query_batched(prompts, model=None, context=_INHERIT):
     with concurrent.futures.ThreadPoolExecutor(max_workers=min(len(prompts), 4)) as pool:
-        futures = [pool.submit(rlm_query, p, model) for p in prompts]
+        futures = [pool.submit(rlm_query, p, model, context) for p in prompts]
         return [f.result() for f in futures]
 
 STATE = "/workspace/state.dill"

@@ -162,11 +162,14 @@ func setupRunLog(dir string) (*os.File, error) {
 func main() {
 	tasksFlag := flag.String("tasks", "", "comma-separated task numbers to run (1-20), e.g. '11,14,16'")
 	itersFlag := flag.Int("iters", 10, "max RLM iterations per task")
+	depthFlag := flag.Int("depth", 1, "max recursion depth (1=llm_query fallback, 2=child RLM with REPL)")
 	datasetFlag := flag.String("dataset", defaultOolongDatasetKey, "dataset size preset to use: 16k or 65k")
 	logDirFlag := flag.String("log_dir", "", "directory to save run logs (empty = stdout/stderr only)")
 	predsFlag := flag.String("preds_dir", "", "directory to save prediction files for evaluation (task_<n>.txt)")
+	reasoningFlag := flag.String("reasoning", "medium", "reasoning effort: low, medium, high")
+	timeoutFlag := flag.Float64("timeout", 0, "per-task timeout in seconds (0 = no timeout)")
 	compactFlag := flag.Bool("compact", false, "enable context compaction (paper-inspired: compact assistant history, store full in REPL vars)")
-	pipelineFlag := flag.String("pipeline", "", "pipeline mode: eager, lean, compact (overrides --compact)")
+	pipelineFlag := flag.String("pipeline", "", "pipeline mode: compact (overrides --compact)")
 	flag.Parse()
 
 	if *logDirFlag != "" {
@@ -207,7 +210,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	effort := shared.ReasoningEffortLow
+	var effort shared.ReasoningEffort
+	switch strings.ToLower(strings.TrimSpace(*reasoningFlag)) {
+	case "low":
+		effort = shared.ReasoningEffortLow
+	case "high":
+		effort = shared.ReasoningEffortHigh
+	default:
+		effort = shared.ReasoningEffortMedium
+	}
 	client := myrlm.NewOpenAIClient(myrlm.ClientConfig{
 		Model:        myrlm.SharedModel(oolongModel),
 		ReasoningEff: &effort,
@@ -216,15 +227,6 @@ func main() {
 	pipelineMode := myrlm.PipelineStandard
 	mode := "standard"
 	switch strings.ToLower(strings.TrimSpace(*pipelineFlag)) {
-	case "eager":
-		pipelineMode = myrlm.PipelineEager
-		mode = "eager"
-	case "lean":
-		pipelineMode = myrlm.PipelineLean
-		mode = "lean"
-	case "eagerlean", "el":
-		pipelineMode = myrlm.PipelineEagerLean
-		mode = "eagerlean"
 	case "compact":
 		pipelineMode = myrlm.PipelineCompact
 		mode = "compact"
@@ -235,18 +237,23 @@ func main() {
 		}
 	}
 
-	rlm := myrlm.NewRLM(client,
+	rlmOpts := []myrlm.RLMOption{
 		myrlm.WithMaxIterations(*itersFlag),
+		myrlm.WithMaxDepth(*depthFlag),
 		myrlm.WithDockerConfig(myrlm.DockerConfig{
 			Model: oolongModel,
 		}),
 		myrlm.WithPipelineMode(pipelineMode),
-	)
+	}
+	if *timeoutFlag > 0 {
+		rlmOpts = append(rlmOpts, myrlm.WithMaxTimeout(*timeoutFlag))
+	}
+	rlm := myrlm.NewRLM(client, rlmOpts...)
 
 	contextText := example.ContextWindowText
 	fmt.Println("═══════════════════════════════════════════════════════════════")
 	fmt.Printf("  OOLONG-Pairs Benchmark — tasks %v — model: %s\n", taskNums, oolongModel)
-	fmt.Printf("  Context: %d chars (%s dataset) — max iters: %d — mode: %s\n", len(contextText), example.Dataset, *itersFlag, mode)
+	fmt.Printf("  Context: %d chars (%s dataset) — max iters: %d — depth: %d — mode: %s — reasoning: %s\n", len(contextText), example.Dataset, *itersFlag, *depthFlag, mode, effort)
 	fmt.Println("═══════════════════════════════════════════════════════════════")
 	fmt.Println()
 

@@ -116,6 +116,9 @@ func (s *REPLServer) handleRLMQuery(w http.ResponseWriter, r *http.Request) {
 
 	child := *s.rlm
 	child.maxDepth = depth - 1
+	if child.maxIterations > 4 {
+		child.maxIterations = 4
+	}
 	if req.Model != nil && *req.Model != "" {
 		child.client = s.clientForModel(req.Model)
 	}
