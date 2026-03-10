@@ -54,6 +54,8 @@ type RLM struct {
 	maxTimeout   *float64
 	maxTokens    *int64
 	maxBudget    int64
+	reuseDocker  bool
+	reusePool    *dockerReusePool
 	customTools  []Tool
 	dockerConfig DockerConfig
 	client       *OpenAIClient
@@ -61,22 +63,29 @@ type RLM struct {
 
 type RLMOption func(*RLM)
 
+type dockerReusePool struct {
+	mu   sync.Mutex
+	repl *DockerREPL
+}
+
 // ─── Docker / REPL ──────────────────────────────────────────────────────────
 
 type DockerConfig struct {
-	Image string
-	Model string
-	Depth int
+	Image        string
+	Model        string
+	Depth        int
+	BatchWorkers int
 }
 
 // DockerREPL manages a Docker container that runs Python code and can call
 // back into the host Go server via llm_query()/rlm_query().
 type DockerREPL struct {
-	image       string
-	containerID string
-	tempDir     string
-	rlmDepth    int
-	closed      bool
+	image        string
+	containerID  string
+	tempDir      string
+	rlmDepth     int
+	batchWorkers int
+	closed       bool
 }
 
 // REPLResult holds the captured output from a single code execution

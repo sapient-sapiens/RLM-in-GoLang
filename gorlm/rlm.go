@@ -13,6 +13,7 @@ func NewRLM(client *OpenAIClient, opts ...RLMOption) *RLM {
 	r := &RLM{
 		maxDepth:  DefaultMaxDepth,
 		maxBudget: DefaultTokenBudget,
+		reuseDocker: true,
 		client:    client,
 	}
 	for _, opt := range opts {
@@ -25,6 +26,7 @@ func WithMaxDepth(d int) RLMOption            { return func(r *RLM) { r.maxDepth
 func WithMaxTimeout(t float64) RLMOption      { return func(r *RLM) { r.maxTimeout = &t } }
 func WithMaxTokens(n int64) RLMOption         { return func(r *RLM) { r.maxTokens = &n } }
 func WithMaxBudget(n int64) RLMOption         { return func(r *RLM) { r.maxBudget = n } }
+func WithReuseDocker(enabled bool) RLMOption  { return func(r *RLM) { r.reuseDocker = enabled } }
 func WithCustomTools(tools []Tool) RLMOption  { return func(r *RLM) { r.customTools = tools } }
 func WithDockerConfig(cfg DockerConfig) RLMOption {
 	return func(r *RLM) { r.dockerConfig = cfg }
@@ -37,6 +39,53 @@ func WithDockerConfig(cfg DockerConfig) RLMOption {
 // not system-driven.
 func (r *RLM) Completion(ctx context.Context, rlmCtx Context, query Query) (string, error) {
 	return r.completion(ctx, rlmCtx, query, true)
+}
+
+// Close releases any reusable Docker REPL resources.
+func (r *RLM) Close() error {
+	if r.reusePool == nil {
+		return nil
+	}
+	r.reusePool.mu.Lock()
+	defer r.reusePool.mu.Unlock()
+	if r.reusePool.repl == nil {
+		return nil
+	}
+	err := r.reusePool.repl.Close()
+	r.reusePool.repl = nil
+	return err
+}
+
+func (r *RLM) acquireREPL(startServer bool) (*DockerREPL, func(), error) {
+	replCfg := r.dockerConfig
+	replCfg.Depth = r.maxDepth
+
+	if !r.reuseDocker || !startServer {
+		repl, err := NewDockerREPL(replCfg)
+		if err != nil {
+			return nil, nil, err
+		}
+		log.Printf("[RLM depth=%d] using fresh Docker REPL for this completion", r.maxDepth)
+		return repl, func() { _ = repl.Close() }, nil
+	}
+
+	if r.reusePool == nil {
+		r.reusePool = &dockerReusePool{}
+	}
+	pool := r.reusePool
+	pool.mu.Lock()
+	if pool.repl == nil {
+		repl, err := NewDockerREPL(replCfg)
+		if err != nil {
+			pool.mu.Unlock()
+			return nil, nil, err
+		}
+		pool.repl = repl
+		log.Printf("[RLM depth=%d] created reusable Docker REPL container", r.maxDepth)
+	} else {
+		log.Printf("[RLM depth=%d] reusing existing Docker REPL container", r.maxDepth)
+	}
+	return pool.repl, func() { pool.mu.Unlock() }, nil
 }
 
 func (r *RLM) completion(ctx context.Context, rlmCtx Context, query Query, startServer bool) (string, error) {
@@ -58,13 +107,15 @@ func (r *RLM) completion(ctx context.Context, rlmCtx Context, query Query, start
 		defer srv.Shutdown(ctx)
 	}
 
-	replCfg := r.dockerConfig
-	replCfg.Depth = r.maxDepth
-	repl, err := NewDockerREPL(replCfg)
+	repl, releaseREPL, err := r.acquireREPL(startServer)
 	if err != nil {
 		return "", fmt.Errorf("create docker repl: %w", err)
 	}
-	defer repl.Close()
+	defer releaseREPL()
+
+	if err := repl.ResetState(); err != nil {
+		return "", fmt.Errorf("reset repl state: %w", err)
+	}
 
 	if err := repl.LoadContext(rlmCtx.Content); err != nil {
 		return "", fmt.Errorf("load context: %w", err)
@@ -178,6 +229,7 @@ func (r *RLM) completion(ctx context.Context, rlmCtx Context, query Query, start
 				"- Preserve the same task intent.\n" +
 				"- Ensure the code executes without syntax/runtime errors.\n" +
 				"- End with FINAL(answer).\n\n" +
+				repairHintFromError(lastErr) +
 				"Previous assistant response (truncated):\n" + truncateForDebug(lastResponse, 3500) + "\n\n" +
 				"Code that was executed (truncated):\n```repl\n" + truncateForDebug(lastCode, 2500) + "\n```\n\n" +
 				"Observed error:\n" + truncateForDebug(lastErr, 1500),
@@ -211,4 +263,15 @@ func truncateForDebug(s string, max int) string {
 		return s
 	}
 	return s[:max] + "\n...[truncated]..."
+}
+
+func repairHintFromError(errText string) string {
+	lower := strings.ToLower(errText)
+	if strings.Contains(lower, "f-string") || strings.Contains(lower, "syntaxerror") {
+		return "Extra guardrail for this fix:\n" +
+			"- Do NOT put backslashes or .replace('\\t', ...) inside f-string expressions.\n" +
+			"- Precompute cleaned strings in variables before formatting.\n" +
+			"- Keep prompt-building code simple (plain loops + joins).\n\n"
+	}
+	return ""
 }

@@ -23,6 +23,10 @@ func NewDockerREPL(cfg DockerConfig) (*DockerREPL, error) {
 	if image == "" {
 		image = defaultImage
 	}
+	batchWorkers := cfg.BatchWorkers
+	if batchWorkers <= 0 {
+		batchWorkers = 6
+	}
 
 	baseDir := os.Getenv("RLM_DOCKER_WORKSPACE_DIR")
 	if baseDir == "" {
@@ -38,9 +42,10 @@ func NewDockerREPL(cfg DockerConfig) (*DockerREPL, error) {
 	}
 
 	d := &DockerREPL{
-		image:    image,
-		tempDir:  tempDir,
-		rlmDepth: cfg.Depth,
+		image:        image,
+		tempDir:      tempDir,
+		rlmDepth:     cfg.Depth,
+		batchWorkers: batchWorkers,
 	}
 
 	success := false
@@ -73,6 +78,7 @@ func (d *DockerREPL) startContainer() error {
 		"--memory=2g",
 		"-v", d.tempDir+":/workspace",
 		"-e", "RLM_SERVER_PORT="+serverPort,
+		"-e", fmt.Sprintf("RLM_BATCH_WORKERS=%d", d.batchWorkers),
 		d.image,
 		"tail", "-f", "/dev/null",
 	).Output()
@@ -119,12 +125,24 @@ func (d *DockerREPL) LoadContext(payload any) error {
 	}
 }
 
+// ResetState clears persisted workspace artifacts so a reused container
+// starts from a clean slate for the next task.
+func (d *DockerREPL) ResetState() error {
+	cmd := exec.Command("docker", "exec", d.containerID, "sh", "-lc",
+		"rm -f /workspace/state.dill /workspace/context.txt /workspace/context.json")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("reset state failed: %w: %s", err, strings.TrimSpace(string(out)))
+	}
+	return nil
+}
+
 // ExecuteCode runs a Python code string inside the Docker container.
 // The code has access to: context, llm_query, llm_query_batched,
 // FINAL_VAR, SHOW_VARS, and any variables from previous executions
 // (persisted via dill).
 func (d *DockerREPL) ExecuteCode(code string) (*REPLResult, error) {
-	script := buildExecScript(code, d.rlmDepth)
+	script := buildExecScript(code, d.rlmDepth, d.batchWorkers)
 
 	cmd := exec.Command("docker", "exec", d.containerID, "python", "-c", script)
 	var stdout, stderr bytes.Buffer
@@ -150,7 +168,7 @@ func (d *DockerREPL) ExecuteCodeWithTimeout(code string, timeout time.Duration) 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	script := buildExecScript(code, d.rlmDepth)
+	script := buildExecScript(code, d.rlmDepth, d.batchWorkers)
 
 	cmd := exec.CommandContext(ctx, "docker", "exec", d.containerID, "python", "-c", script)
 	var stdout, stderr bytes.Buffer
@@ -196,7 +214,7 @@ func (d *DockerREPL) Close() error {
 //   - defines FINAL_VAR and SHOW_VARS
 //   - executes the user's code with stdout/stderr capture
 //   - saves state and outputs JSON on the last line
-func buildExecScript(code string, rlmDepth int) string {
+func buildExecScript(code string, rlmDepth int, batchWorkers int) string {
 	codeB64 := base64.StdEncoding.EncodeToString([]byte(code))
 
 	return fmt.Sprintf(`
@@ -214,6 +232,7 @@ except ImportError:
 
 _SERVER_BASE = "http://host.docker.internal:" + os.environ["RLM_SERVER_PORT"]
 _RLM_DEPTH = %d
+_BATCH_WORKERS = max(1, int(os.environ.get("RLM_BATCH_WORKERS", "%d")))
 
 def _post(path, body, timeout=1800):
     data = json.dumps(body).encode()
@@ -235,9 +254,22 @@ def llm_query(prompt, model=None):
     return resp.get("text") or resp.get("error", "Unknown error")
 
 def llm_query_batched(prompts, model=None):
-    with concurrent.futures.ThreadPoolExecutor(max_workers=min(len(prompts), 4)) as pool:
-        futures = [pool.submit(llm_query, p, model) for p in prompts]
-        return [f.result() for f in futures]
+    if not prompts:
+        return []
+    workers = min(len(prompts), _BATCH_WORKERS)
+    results = [None] * len(prompts)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+        future_to_idx = {pool.submit(llm_query, p, model): i for i, p in enumerate(prompts)}
+        for fut in concurrent.futures.as_completed(future_to_idx):
+            i = future_to_idx[fut]
+            try:
+                results[i] = fut.result()
+            except Exception as e:
+                results[i] = f"Error: {e}"
+    for i, item in enumerate(results):
+        if item is None:
+            results[i] = "Error: empty batch result"
+    return results
 
 def _safe_context_payload():
     ctx = _locals.get("context")
@@ -352,7 +384,7 @@ output = {
     "final_answer": _final_answer[0],
 }
 print(json.dumps(output, ensure_ascii=False))
-`, rlmDepth, codeB64)
+`, rlmDepth, batchWorkers, codeB64)
 }
 
 // execOutput is the JSON structure printed by the exec script.
