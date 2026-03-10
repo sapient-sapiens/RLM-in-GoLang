@@ -11,14 +11,6 @@ import (
 	"github.com/openai/openai-go/v3/shared"
 )
 
-// REPLServer is the HTTP server that the Docker container calls back into
-// for llm_query and rlm_query.
-type REPLServer struct {
-	server *http.Server
-	client *OpenAIClient
-	rlm    *RLM
-}
-
 func NewREPLServer(client *OpenAIClient, rlm *RLM) *REPLServer {
 	s := &REPLServer{client: client, rlm: rlm}
 

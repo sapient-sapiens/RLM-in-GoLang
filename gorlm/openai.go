@@ -14,37 +14,12 @@ import (
 	"github.com/openai/openai-go/v3/shared"
 )
 
-var DefaultModel shared.ResponsesModel = openai.ChatModelGPT5
-
 const (
 	defaultCompactionThreshold int64 = 12000
 )
 
 func SharedModel(name string) shared.ResponsesModel {
 	return shared.ResponsesModel(name)
-}
-
-type ClientConfig struct {
-	APIKey       string
-	Model        shared.ResponsesModel
-	ReasoningEff *shared.ReasoningEffort
-	Temperature  *float64
-	MaxTokens    *int64
-	Instructions string
-	// CompactionThreshold controls when Responses API context compaction triggers.
-	// If nil, a conservative default is used.
-	// Set to <= 0 to disable explicit compaction configuration.
-	CompactionThreshold *int64
-	// DisableAutoTruncation disables Responses API truncation="auto" behavior.
-	// By default truncation stays enabled so oversized contexts don't hard-fail.
-	DisableAutoTruncation bool
-}
-
-type OpenAIClient struct {
-	raw    openai.Client
-	model  shared.ResponsesModel
-	config ClientConfig
-	Usage  *UsageTracker
 }
 
 func NewOpenAIClient(cfg ClientConfig) *OpenAIClient {
@@ -133,11 +108,6 @@ func (c *OpenAIClient) extractUsage(resp *responses.Response, start time.Time, s
 	return stats
 }
 
-type QueryResult struct {
-	Text  string
-	Stats RequestStats
-}
-
 func (c *OpenAIClient) Query(ctx context.Context, prompt string) (*QueryResult, error) {
 	params := c.baseParams(responses.ResponseNewParamsInputUnion{
 		OfString: openai.String(prompt),
@@ -180,13 +150,6 @@ func (c *OpenAIClient) QueryMessages(ctx context.Context, messages []Prompt) (*Q
 
 	stats := c.extractUsage(resp, start, false, 0)
 	return &QueryResult{Text: resp.OutputText(), Stats: stats}, nil
-}
-
-type StreamCallback func(delta string) error
-
-type StreamResult struct {
-	Text  string
-	Stats RequestStats
 }
 
 func (c *OpenAIClient) QueryStream(ctx context.Context, prompt string, onDelta StreamCallback) (*StreamResult, error) {
@@ -246,17 +209,6 @@ func PrintStreamCallback(w io.Writer) StreamCallback {
 		_, err := fmt.Fprint(w, delta)
 		return err
 	}
-}
-
-// ─── Chat Sessions ──────────────────────────────────────────────────────────
-
-type Chat struct {
-	client          *OpenAIClient
-	lastResponseID  string
-	instructions    string
-	model           shared.ResponsesModel
-	maxOutputTokens *int64
-	turns           int
 }
 
 func (c *OpenAIClient) NewChat() *Chat {

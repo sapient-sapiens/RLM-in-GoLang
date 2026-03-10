@@ -3,28 +3,8 @@ package myrlm
 import (
 	"fmt"
 	"strings"
-	"sync"
 	"time"
 )
-
-type TokenUsage struct {
-	InputTokens      int64
-	OutputTokens     int64
-	TotalTokens      int64
-	CachedTokens     int64
-	ReasoningTokens  int64
-}
-
-type RequestStats struct {
-	Model           string
-	StartTime       time.Time
-	EndTime         time.Time
-	Duration        time.Duration
-	TimeToFirstTok  time.Duration
-	Streamed        bool
-	Tokens          TokenUsage
-	ResponseID      string
-}
 
 func (s RequestStats) TokensPerSecond() float64 {
 	secs := s.Duration.Seconds()
@@ -63,11 +43,6 @@ func (s RequestStats) String() string {
 	b.WriteString(fmt.Sprintf("  Total tokens:      %d\n", s.Tokens.TotalTokens))
 	b.WriteString(fmt.Sprintf("  Output tok/s:      %.1f\n", s.TokensPerSecond()))
 	return b.String()
-}
-
-type UsageTracker struct {
-	mu       sync.Mutex
-	requests []RequestStats
 }
 
 func NewUsageTracker() *UsageTracker {
@@ -112,18 +87,6 @@ func (t *UsageTracker) Summary() SessionSummary {
 	s.AvgLatency = s.TotalDuration / time.Duration(s.TotalRequests)
 
 	return s
-}
-
-type SessionSummary struct {
-	TotalRequests        int
-	TotalDuration        time.Duration
-	AvgLatency           time.Duration
-	TotalInputTokens     int64
-	TotalOutputTokens    int64
-	TotalTokens          int64
-	TotalCachedTokens    int64
-	TotalReasoningTokens int64
-	AvgOutputTokPerSec   float64
 }
 
 func (s SessionSummary) String() string {

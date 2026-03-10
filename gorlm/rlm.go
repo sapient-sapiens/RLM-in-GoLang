@@ -9,25 +9,6 @@ import (
 	"time"
 )
 
-const (
-	DefaultMaxDepth          = 3
-	DefaultMaxTurns          = 50
-	DefaultMaxConsecErrors   = 5
-	DefaultTokenBudget int64 = 500_000
-)
-
-type RLM struct {
-	maxDepth    int
-	maxTurns    int
-	maxTimeout  *float64
-	maxTokens   *int64
-	maxBudget   int64
-	maxErrors   int
-	customTools []Tool
-	dockerConfig DockerConfig
-	client       *OpenAIClient
-}
-
 func NewRLM(client *OpenAIClient, opts ...RLMOption) *RLM {
 	r := &RLM{
 		maxDepth:  DefaultMaxDepth,
@@ -41,8 +22,6 @@ func NewRLM(client *OpenAIClient, opts ...RLMOption) *RLM {
 	}
 	return r
 }
-
-type RLMOption func(*RLM)
 
 func WithMaxDepth(d int) RLMOption            { return func(r *RLM) { r.maxDepth = d } }
 func WithMaxTurns(n int) RLMOption            { return func(r *RLM) { r.maxTurns = n } }

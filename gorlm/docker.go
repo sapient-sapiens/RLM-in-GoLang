@@ -15,33 +15,6 @@ import (
 
 const defaultImage = "python:3.11-slim"
 
-// REPLResult holds the captured output from a single code execution
-// inside the Docker container.
-type REPLResult struct {
-	Stdout        string
-	Stderr        string
-	Locals        map[string]string
-	ExecutionTime time.Duration
-	FinalAnswer   string
-}
-
-// DockerREPL manages a Docker container that runs Python code and can call
-// back into the host Go server via llm_query()/rlm_query().
-type DockerREPL struct {
-	image       string
-	containerID string
-	tempDir     string
-	rlmDepth    int
-	closed      bool
-}
-
-// DockerConfig holds options for creating a DockerREPL.
-type DockerConfig struct {
-	Image string
-	Model string
-	Depth int
-}
-
 // NewDockerREPL creates and starts a Docker container with a mounted workspace.
 // The container executes REPL code and uses HTTP callbacks to the Go server for
 // llm_query()/rlm_query().

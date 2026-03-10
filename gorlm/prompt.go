@@ -5,11 +5,6 @@ import (
 	"strings"
 )
 
-type Prompt struct {
-	Role    string
-	Content string
-}
-
 var DEFAULT_SYSTEM_PROMPT = Prompt{
 	Role: "system",
 	Content: `You are a recursive reasoning orchestrator. You do NOT solve problems directly — you break them down and delegate to sub-LLMs, then aggregate results in code.
