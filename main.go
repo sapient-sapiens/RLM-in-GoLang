@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -138,20 +137,10 @@ func resolveDataset(key string) (string, error) {
 	return spec.Path, nil
 }
 
-type teeWriter struct {
-	terminal *os.File
-	logFile  *os.File
-}
-
-func (t *teeWriter) Write(p []byte) (int, error) {
-	n, err := t.terminal.Write(p)
-	if t.logFile != nil {
-		t.logFile.Write(p)
-	}
-	return n, err
-}
-
 func setupRunLog(dir string) (*os.File, error) {
+	if dir == "" {
+		return nil, fmt.Errorf("log_dir is empty")
+	}
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return nil, fmt.Errorf("create log dir: %w", err)
 	}
@@ -161,28 +150,11 @@ func setupRunLog(dir string) (*os.File, error) {
 		return nil, err
 	}
 
-	origStdout := os.Stdout
-	origStderr := os.Stderr
-
-	outR, outW, err := os.Pipe()
-	if err != nil {
-		f.Close()
-		return nil, err
-	}
-	errR, errW, err := os.Pipe()
-	if err != nil {
-		outR.Close()
-		outW.Close()
-		f.Close()
-		return nil, err
-	}
-
-	os.Stdout = outW
-	os.Stderr = errW
-	log.SetOutput(errW)
-
-	go io.Copy(&teeWriter{terminal: origStdout, logFile: f}, outR)
-	go io.Copy(&teeWriter{terminal: origStderr, logFile: f}, errR)
+	// Redirect all output to the log file. log.Printf goes via log.SetOutput,
+	// and fmt.Println/Printf goes via os.Stdout replacement.
+	log.SetOutput(f)
+	os.Stdout = f
+	os.Stderr = f
 
 	return f, nil
 }
@@ -191,20 +163,19 @@ func main() {
 	tasksFlag := flag.String("tasks", "", "comma-separated task numbers to run (1-20), e.g. '11,14,16'")
 	itersFlag := flag.Int("iters", 10, "max RLM iterations per task")
 	datasetFlag := flag.String("dataset", defaultOolongDatasetKey, "dataset size preset to use: 16k or 65k")
-	logDirFlag := flag.String("log_dir", "logs", "directory to save run logs")
+	logDirFlag := flag.String("log_dir", "", "directory to save run logs (empty = stdout/stderr only)")
 	predsFlag := flag.String("preds_dir", "", "directory to save prediction files for evaluation (task_<n>.txt)")
+	compactFlag := flag.Bool("compact", false, "enable context compaction (paper-inspired: compact assistant history, store full in REPL vars)")
+	pipelineFlag := flag.String("pipeline", "", "pipeline mode: eager, lean, compact (overrides --compact)")
 	flag.Parse()
 
-	logFile, err := setupRunLog(*logDirFlag)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Warning: could not set up log file: %v\n", err)
-	} else {
-		defer func() {
-			os.Stdout.Close()
-			os.Stderr.Close()
-			time.Sleep(50 * time.Millisecond)
-			logFile.Close()
-		}()
+	if *logDirFlag != "" {
+		logFile, err := setupRunLog(*logDirFlag)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: could not set up log file: %v\n", err)
+		} else {
+			defer logFile.Close()
+		}
 	}
 
 	if *predsFlag != "" {
@@ -242,18 +213,40 @@ func main() {
 		ReasoningEff: &effort,
 	})
 
+	pipelineMode := myrlm.PipelineStandard
+	mode := "standard"
+	switch strings.ToLower(strings.TrimSpace(*pipelineFlag)) {
+	case "eager":
+		pipelineMode = myrlm.PipelineEager
+		mode = "eager"
+	case "lean":
+		pipelineMode = myrlm.PipelineLean
+		mode = "lean"
+	case "eagerlean", "el":
+		pipelineMode = myrlm.PipelineEagerLean
+		mode = "eagerlean"
+	case "compact":
+		pipelineMode = myrlm.PipelineCompact
+		mode = "compact"
+	default:
+		if *compactFlag {
+			pipelineMode = myrlm.PipelineCompact
+			mode = "compact"
+		}
+	}
+
 	rlm := myrlm.NewRLM(client,
 		myrlm.WithMaxIterations(*itersFlag),
 		myrlm.WithDockerConfig(myrlm.DockerConfig{
 			Model: oolongModel,
 		}),
+		myrlm.WithPipelineMode(pipelineMode),
 	)
 
 	contextText := example.ContextWindowText
-
 	fmt.Println("═══════════════════════════════════════════════════════════════")
 	fmt.Printf("  OOLONG-Pairs Benchmark — tasks %v — model: %s\n", taskNums, oolongModel)
-	fmt.Printf("  Context: %d chars (%s dataset) — max iters: %d\n", len(contextText), example.Dataset, *itersFlag)
+	fmt.Printf("  Context: %d chars (%s dataset) — max iters: %d — mode: %s\n", len(contextText), example.Dataset, *itersFlag, mode)
 	fmt.Println("═══════════════════════════════════════════════════════════════")
 	fmt.Println()
 

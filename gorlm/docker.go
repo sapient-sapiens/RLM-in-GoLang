@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -145,6 +146,16 @@ func (d *DockerREPL) LoadContext(payload any) error {
 	}
 }
 
+// WriteTempFile writes a file into the container's workspace directory.
+// Returns the in-container path (always /workspace/<name>).
+func (d *DockerREPL) WriteTempFile(name, content string) string {
+	path := filepath.Join(d.tempDir, name)
+	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+		log.Printf("[DockerREPL] warning: failed to write temp file %s: %v", name, err)
+	}
+	return "/workspace/" + name
+}
+
 // ExecuteCode runs a Python code string inside the Docker container.
 // The code has access to: context, llm_query, llm_query_batched,
 // FINAL_VAR, SHOW_VARS, and any variables from previous executions
@@ -261,7 +272,7 @@ def llm_query(prompt, model=None):
     return resp.get("text") or resp.get("error", "Unknown error")
 
 def llm_query_batched(prompts, model=None):
-    with concurrent.futures.ThreadPoolExecutor(max_workers=min(len(prompts), 8)) as pool:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=min(len(prompts), 16)) as pool:
         futures = [pool.submit(llm_query, p, model) for p in prompts]
         return [f.result() for f in futures]
 
