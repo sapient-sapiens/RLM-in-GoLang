@@ -99,9 +99,7 @@ A massive jump from the compact pipeline's 0.60 F1 and the Python reference impl
 
 1. REPL Cold-Turkey Start on the REPL - Inefficient to start this again every thing we call on a new rlm repl. We don't really need independence for reproducibility - we just need a docker container where we can run code.
 2. Streaming - Just send off tasks and run the python code as you go - don't wait.
-3. Batching for Parallelism.
-
-The batching point deserves some expansion: the system exposes `llm_query_batched` and `rlm_query_batched` tools that let the model fire off multiple LLM/RLM calls in parallel from a single Python code block. For tasks that involve classifying many documents independently, this can dramatically cut wall-clock time by overlapping API calls instead of making them sequentially.
+3. Batching - preventing other workers from being idle while waiting for one long api call. 
 
 Combined effect of these micro-changes on top of the truly recursive architecture (16k, gpt-5 medium, 7 hard tasks, averaged over 2 runs):
 
