@@ -23,7 +23,7 @@ There are 20 tasks total. Running and evaluating for these tasks even when the d
 
 ### Baseline Results (Python RLM, 16k, gpt-5 default reasoning, 20 iters)
 
-The paper only reports average F1 across all 20 tasks. We re-ran the Python reference code on tasks that it struggled in the most (Task 3 is included because it often resulted in 0.0 F1 but this run happens to have been a luckier one). Max iterations was set to 20 instead of the default 10.  
+The paper only reports average F1 across all 20 tasks. We re-ran twice the Python reference code on tasks that it struggled in the most (Task 3 is included because of its duration). Max iterations was set to 20 instead of the default 10.   
 
 
 | Task | Gold | Pred | P    | R    | F1   | Time |
@@ -137,7 +137,7 @@ Running the same truly-recursive architecture on the 65k dataset (4x larger cont
 | **ALL** |        |        | **0.537** | **48.7m** |
 
 
-The 65k dataset is substantially harder. Tasks 7 and 16 produced zero predictions — the model either failed to parse the larger context or ran into issues completing the classification pipeline within the token budget. The paper reports a score of 0.60 (and remember, this is all 20 tasks, and the easier ones you can get a score of > 0.9, so our results are actually pretty good here). However, when we tested this, the model failed often. In the paper, they use the mini model for the subcalls but we always stuck with gpt5-medium model. This just goes to show how recursive and out-of-the-box our architecture is. 
+The 65k dataset is substantially harder. Tasks 7 and 16 produced zero predictions — the model either failed to parse the larger context or ran into issues completing the classification pipeline within the token budget. The paper reports a score of 0.60 (and remember, this is all 20 tasks, and the easier ones you can get a score of > 0.9, so our results which are only for hardest tasks are actually pretty good here). However, when we tested their code, the rlm failed often. In the paper, they use the mini model for the subcalls but we always stuck with gpt5-medium model which caused it to spend too much time on simple tasks. This just goes to show how recursive and out-of-the-box our architecture/workflow is. 
 
 ## Directions I Did Not Pursue for the sake of This Project:
 
@@ -151,6 +151,5 @@ The 65k dataset is substantially harder. Tasks 7 and 16 produced zero prediction
 1. Prompting is very important - the only way to change model behavior without getting into fine-tuning. 
 2. Figure out cleaner/less variable evals - tough that temperature = 0 is not available for gpt-5. 
 3. Keep better track of work progress - messy and had to rerun and redo a lot of things... 
-4. Using Go wasn't really necessary - didn't really deal to much in concurrency - main bottlenecks were in the overall algorithm/api calls. 
-
+4. Using Go wasn't really necessary - didn't really deal to much in concurrency - main bottlenecks were in the overall algorithm/api calls.
 
