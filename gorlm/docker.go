@@ -161,9 +161,13 @@ func (d *DockerREPL) WriteTempFile(name, content string) string {
 // FINAL_VAR, SHOW_VARS, and any variables from previous executions
 // (persisted via dill).
 func (d *DockerREPL) ExecuteCode(code string) (*REPLResult, error) {
+	return d.ExecuteCodeCtx(context.Background(), code)
+}
+
+func (d *DockerREPL) ExecuteCodeCtx(ctx context.Context, code string) (*REPLResult, error) {
 	script := buildExecScript(code, d.rlmDepth)
 
-	cmd := exec.Command("docker", "exec", d.containerID, "python", "-c", script)
+	cmd := exec.CommandContext(ctx, "docker", "exec", d.containerID, "python", "-c", script)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -171,6 +175,13 @@ func (d *DockerREPL) ExecuteCode(code string) (*REPLResult, error) {
 	start := time.Now()
 	runErr := cmd.Run()
 	elapsed := time.Since(start)
+
+	if ctx.Err() != nil {
+		return &REPLResult{
+			Stderr:        "Execution cancelled (context deadline exceeded)",
+			ExecutionTime: elapsed,
+		}, fmt.Errorf("execution cancelled after %s: %w", elapsed, ctx.Err())
+	}
 	if runErr != nil {
 		if stderr.Len() > 0 {
 			stderr.WriteString("\n")
@@ -342,8 +353,19 @@ def FINAL_VAR(name):
 def SHOW_VARS():
     available = {k: type(v).__name__ for k, v in _locals.items() if not k.startswith("_")}
     if not available:
-        return "No variables created yet."
-    return f"Available variables: {available}"
+        msg = "No variables created yet."
+    else:
+        parts = []
+        for k, t in available.items():
+            v = _locals[k]
+            try:
+                length = len(v)
+                parts.append(f"  {k} ({t}, len={length})")
+            except TypeError:
+                parts.append(f"  {k} ({t})")
+        msg = "Available variables:\n" + "\n".join(parts)
+    print(msg)
+    return msg
 
 _globals = {
     "__builtins__": __builtins__,

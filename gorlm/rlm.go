@@ -169,12 +169,18 @@ func (r *RLM) completion(ctx context.Context, rlmCtx Context, query Query, start
 		iterationHadError := false
 
 		for j, code := range codeBlocks {
+			if ctx.Err() != nil {
+				return "", fmt.Errorf("context cancelled before code block %d: %w", j+1, ctx.Err())
+			}
 			log.Printf("[RLM] iter %d — executing code block %d/%d (%d chars)...",
 				i+1, j+1, len(codeBlocks), len(code))
-			replResult, execErr := repl.ExecuteCode(code)
+			replResult, execErr := repl.ExecuteCodeCtx(ctx, code)
 			if execErr != nil || (replResult != nil && strings.TrimSpace(replResult.Stderr) != "") {
 				iterationHadError = true
 				if execErr != nil {
+					if ctx.Err() != nil {
+						return "", fmt.Errorf("timeout during code execution: %w", ctx.Err())
+					}
 					log.Printf("[RLM] iter %d — code block %d exec error: %v", i+1, j+1, execErr)
 				}
 				if replResult != nil && strings.TrimSpace(replResult.Stderr) != "" {
@@ -270,23 +276,24 @@ func buildLedger(records []turnRecord) string {
 	}
 	var b strings.Builder
 	b.WriteString("## Context Ledger — History of Previous Turns\n")
-	b.WriteString("Each turn's full assistant response and REPL output are stored in REPL variables.\n")
-	b.WriteString("To recall details: `print(_turn_N_response)` or `print(_turn_N_output)`\n\n")
+	b.WriteString("All REPL variables from previous turns are still live. Use `print(var)` to inspect.\n")
+	b.WriteString("Full turn content: `print(_turn_N_response)` or `print(_turn_N_output)`\n\n")
 	for _, rec := range records {
 		status := "OK"
 		if rec.HadError {
-			status = "ERROR"
+			status = "ERROR — check `print(_turn_" + fmt.Sprint(rec.Turn) + "_output)` for details"
 		}
-		fmt.Fprintf(&b, "- **Turn %d** [%s]: %d code blocks executed, assistant response=%d chars",
-			rec.Turn, status, rec.CodeBlocks, rec.AssistantLen)
+		fmt.Fprintf(&b, "- **Turn %d** [%s]: %d code blocks executed",
+			rec.Turn, status, rec.CodeBlocks)
 		if len(rec.VarsCreated) > 0 {
-			fmt.Fprintf(&b, ", vars: %s", strings.Join(rec.VarsCreated, ", "))
+			fmt.Fprintf(&b, "\n  Variables created: %s", strings.Join(rec.VarsCreated, ", "))
 		}
 		b.WriteString("\n")
 		if rec.OutputPreview != "" {
-			fmt.Fprintf(&b, "  Output preview: %s\n", rec.OutputPreview)
+			fmt.Fprintf(&b, "  Output: %s\n", rec.OutputPreview)
 		}
 	}
+	b.WriteString("\n**Reminder:** Do NOT re-parse data or re-run code from previous turns. Your variables are live. Focus on the next step.\n")
 	return b.String()
 }
 
@@ -429,13 +436,19 @@ func (r *RLM) completionCompacted(ctx context.Context, rlmCtx Context, query Que
 		iterationHadError := false
 
 		for j, code := range codeBlocks {
+			if ctx.Err() != nil {
+				return "", fmt.Errorf("context cancelled before code block %d: %w", j+1, ctx.Err())
+			}
 			log.Printf("[RLM-compact] iter %d — executing code block %d/%d (%d chars)...",
 				i+1, j+1, len(codeBlocks), len(code))
-			replResult, execErr := repl.ExecuteCode(code)
+			replResult, execErr := repl.ExecuteCodeCtx(ctx, code)
 			if execErr != nil || (replResult != nil && strings.TrimSpace(replResult.Stderr) != "") {
 				iterationHadError = true
 				rec.HadError = true
 				if execErr != nil {
+					if ctx.Err() != nil {
+						return "", fmt.Errorf("timeout during code execution: %w", ctx.Err())
+					}
 					log.Printf("[RLM-compact] iter %d — code block %d exec error: %v", i+1, j+1, execErr)
 				}
 				if replResult != nil && strings.TrimSpace(replResult.Stderr) != "" {
