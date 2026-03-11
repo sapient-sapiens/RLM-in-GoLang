@@ -6,3 +6,4 @@ logs/
 .rlm_workspace/
 preds/
 *.pdf
+rlm-bench
