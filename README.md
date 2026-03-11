@@ -43,7 +43,7 @@ Average F1 over these 7 tasks: **0.72**. Total wall clock: ~48 minutes (one run)
 
 ## Workflow Decisions
 
-1. Initial Attempt:  History compaction (`main` branch)
+1. Initial Attempt:  History compaction (`compacted-history` branch)
 
 Initially, I spent a lot of time trying to take most of the existing structure of the RLM repository and iterate upon it. Managing the history of this conversation was certainly interesting. I tried a bunch of stuff. 
 
@@ -69,7 +69,7 @@ Macro F1: **0.60** (run 1), **0.61** (run 2). Wall clock: 35/45min.
 
 In summary, this workflow was not as powerful as the original workflow. We obersever from the traces of the RLM that it would often just rely on the summarized version instead of asking for the past history again. The run-time improved a lot though. We tried a bunch of stuff like this but it ended up more or less like this. 
 
-1. My Approach: Truly recursive, single-shot execution (`truly-recursive-rlm` branch)
+2. My Approach: Truly recursive, single-shot execution (`main` branch)
 
 The original Go implementation (like the Python reference) used a fixed iteration loop — the system called the LLM up to N times (like a chat), feeding back REPL output each round. The `truly-recursive-rlm` branch replaced this with **model-driven recursion**: the LLM is called once, produces a single code block, and if it needs more reasoning it calls `rlm_query()` from within its code, which recursively invokes another `Completion`. In other words, an RLM call must produce an answer with one iteration instead of allowing the model to relax back on the later iterations. This is a much more natural and truly recursive structure than before. Also, we don't need to pass on message history, the rlm naturally delegates relevant information when calling the rlm from within. 
 
