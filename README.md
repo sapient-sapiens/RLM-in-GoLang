@@ -151,6 +151,6 @@ The 65k dataset is substantially harder. Tasks 7 and 16 produced zero prediction
 1. Prompting is very important - the only way to change model behavior without getting into fine-tuning. 
 2. Figure out cleaner/less variable evals - tough that temperature = 0 is not available for gpt-5. 
 3. Keep better track of work progress - messy and had to rerun and redo a lot of things... 
-
+4. Using Go wasn't really necessary - didn't really deal to much in concurrency - main bottlenecks were in the overall algorithm/api calls. 
 
 
