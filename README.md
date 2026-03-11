@@ -23,7 +23,7 @@ There are 20 tasks total. Running and evaluating for these tasks even when the d
 
 ### Baseline Results (Python RLM, 16k, gpt-5 default reasoning, 20 iters)
 
-The paper only reports average F1 across all 20 tasks. We re-ran the Python reference code on tasks with F1 below 70%.
+The paper only reports average F1 across all 20 tasks. We re-ran the Python reference code on tasks that it struggled in the most (Task 3 is included because it often resulted in 0.0 F1 but this run happens to have been a luckier one). Max iterations was set to 20 instead of the default 10.  
 
 
 | Task | Gold | Pred | P    | R    | F1   | Time |
@@ -67,7 +67,7 @@ Results (Go RLM Compact, 16k, gpt-5 medium, 20 iters):
 
 Macro F1: **0.60** (run 1), **0.61** (run 2). Wall clock: 35/45min.
 
-In summary, this workflow was not as powerful as the original workflow. We obersever from the traces of the RLM that it would often just rely on the summarized version instead of asking for the past history again. The run-time improved a lot though. We tried a bunch of stuff like this but it ended up more or less like this. 
+In summary, this workflow was not as powerful as the original workflow (though the average was brought down by task 5, and again, high variance). We oberseved from the traces of the RLM that it would often just rely on the summarized version instead of asking for the past history again. The run-time improved a lot though. We tried a bunch of stuff like this but it ended up more or less like this. 
 
 2. My Approach: Truly recursive, single-shot execution (`main` branch)
 
